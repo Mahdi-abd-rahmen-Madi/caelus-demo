@@ -1,8 +1,9 @@
 import { Box, CircularProgress } from '@mui/material';
-import { Suspense, lazy, useCallback, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useMemo, useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { Search } from '../components/mapcomponent/Search';
 import { SidePanel } from '../components/mapcomponent/sidepanel';
+import WelcomeExplanation from '../components/WelcomeExplanation';
 import { useAppState } from '../context/AppStateContext';
 import { useDashboardState } from '../context/AppStateSelectors';
 import { getParcelDetailWithGeorisques } from '../services/api';
@@ -15,6 +16,23 @@ const DashboardContent = () => {
   const [mapInstance, setMapInstance] = useState<any>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([0, 0]);
   const [isCriteriasOpen, setIsCriteriasOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // Check for first visit on component mount
+  useEffect(() => {
+    const hasVisitedBefore = localStorage.getItem('caelus-demo-visited');
+    if (!hasVisitedBefore) {
+      setShowWelcome(true);
+    }
+  }, []);
+
+  // Handle welcome dialog close
+  const handleWelcomeClose = (permanent: boolean = false) => {
+    setShowWelcome(false);
+    if (permanent) {
+      localStorage.setItem('caelus-demo-visited', 'true');
+    }
+  };
 
   // Pin drop state - managed here and passed to SidePanel and Map
   const [isPinMode, setIsPinMode] = useState(false);
@@ -481,6 +499,12 @@ const DashboardContent = () => {
         setSearchQuery={setSearchQuery}
         onLocationSelect={memoizedHandlers.handleLocationSelect}
         onSearchTrigger={memoizedHandlers.handleSearchTrigger}
+      />
+
+      {/* Welcome Explanation */}
+      <WelcomeExplanation
+        open={showWelcome}
+        onClose={handleWelcomeClose}
       />
 
     </Box>
