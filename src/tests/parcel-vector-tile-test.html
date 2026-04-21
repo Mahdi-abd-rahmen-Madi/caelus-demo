@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parcel Vector Tiles Performance Test</title>
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .controls h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .control-group:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px 12px;
+            background: #007cbf;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #005a87;
+        }
+
+        .btn.active {
+            background: #28a745;
+        }
+
+        .btn.danger {
+            background: #dc3545;
+        }
+
+        .btn.danger:hover {
+            background: #c82333;
+        }
+
+        .performance-metrics {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .metric {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .metric-label {
+            font-weight: bold;
+        }
+
+        .metric-value {
+            color: #666;
+        }
+
+        .log-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+
+        .log-entry.info {
+            color: #007cbf;
+        }
+
+        .log-entry.error {
+            color: #dc3545;
+        }
+
+        .log-entry.success {
+            color: #28a745;
+        }
+
+        .log-entry.warning {
+            color: #ffc107;
+        }
+
+        .source-info {
+            background: #e9ecef;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+
+        .property-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+
+        .zoom-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="zoom-info" id="zoomInfo">
+        Zoom: <span id="zoomLevel">12</span> | Center: <span id="centerCoords">2.3522, 48.8566</span>
+    </div>
+
+    <div class="controls">
+        <h3>Parcel Vector Tiles Test</h3>
+
+        <div class="control-group">
+            <h4>Tile Source Selection</h4>
+            <button class="btn" onclick="testDynamicMVT()">Dynamic MVT (Simple)</button>
+            <button class="btn" onclick="testPrecomputedTiles()">Precomputed Tiles</button>
+            <button class="btn" onclick="testGeoJSONComparison()">GeoJSON (Current)</button>
+            <button class="btn" onclick="loadGeoJSONCurrentView()">Load GeoJSON for Current View</button>
+            <button class="btn danger" onclick="clearAll()">Clear All</button>
+
+            <div class="source-info" id="sourceInfo">
+                No source loaded
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h4>Layer Controls</h4>
+            <button class="btn" onclick="toggleFillLayer()">Toggle Fill</button>
+            <button class="btn" onclick="toggleOutlineLayer()">Toggle Outline</button>
+            <button class="btn" onclick="changeLayerStyle()">Change Style</button>
+        </div>
+
+        <div class="control-group">
+            <h4>Performance Metrics</h4>
+            <div class="performance-metrics">
+                <div class="metric">
+                    <span class="metric-label">Tiles Loaded:</span>
+                    <span class="metric-value" id="tilesLoaded">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Load Time (avg):</span>
+                    <span class="metric-value" id="avgLoadTime">0ms</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Features Rendered:</span>
+                    <span class="metric-value" id="featuresRendered">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Memory Usage:</span>
+                    <span class="metric-value" id="memoryUsage">N/A</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Network Requests:</span>
+                    <span class="metric-value" id="networkRequests">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h4>Feature Properties</h4>
+            <div class="property-display" id="propertyDisplay">
+                Click on a parcel to see properties
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h4>Activity Log</h4>
+            <button class="btn" onclick="clearLog()">Clear Log</button>
+            <div class="log-output" id="logOutput">
+                <div class="log-entry info">Test page loaded</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:8000/api/geodata';
+
+        // Map initialization
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {
+                    'basemap': {
+                        type: 'raster',
+                        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        tileSize: 256
+                    }
+                },
+                layers: [{
+                    id: 'basemap',
+                    type: 'raster',
+                    source: 'basemap',
+                    minzoom: 0,
+                    maxzoom: 19
+                }]
+            },
+            center: [4.8059, 43.9493], // Avignon
+            zoom: 12
+        });
+
+        map.addControl(new maplibregl.NavigationControl());
+
+        // State management
+        let currentSource = null;
+        let currentLayers = [];
+        let performanceMetrics = {
+            tilesLoaded: 0,
+            totalLoadTime: 0,
+            featuresRendered: 0,
+            networkRequests: 0
+        };
+        let currentStyleIndex = 0;
+
+        // Layer styles
+        const layerStyles = [
+            {
+                name: 'Default Red',
+                fill: { 'fill-color': '#e74c3c', 'fill-opacity': 0.7 },
+                outline: { 'line-color': '#c0392b', 'line-width': 1 }
+            },
+            {
+                name: 'Blue Theme',
+                fill: { 'fill-color': '#3498db', 'fill-opacity': 0.6 },
+                outline: { 'line-color': '#2980b9', 'line-width': 1 }
+            },
+            {
+                name: 'Green Theme',
+                fill: { 'fill-color': '#27ae60', 'fill-opacity': 0.7 },
+                outline: { 'line-color': '#229954', 'line-width': 1 }
+            },
+            {
+                name: 'Score-based',
+                fill: {
+                    'fill-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'candidate_score'],
+                        0, '#ff0000',
+                        25, '#ff8800',
+                        50, '#ffff00',
+                        75, '#88ff00',
+                        100, '#00ff00'
+                    ],
+                    'fill-opacity': 0.7
+                },
+                outline: { 'line-color': '#666', 'line-width': 0.5 }
+            }
+        ];
+
+        // Utility functions
+        function log(message, type = 'info') {
+            const logOutput = document.getElementById('logOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logOutput.appendChild(logEntry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        function updateMetrics() {
+            document.getElementById('tilesLoaded').textContent = performanceMetrics.tilesLoaded;
+            document.getElementById('avgLoadTime').textContent =
+                performanceMetrics.tilesLoaded > 0 ?
+                    `${Math.round(performanceMetrics.totalLoadTime / performanceMetrics.tilesLoaded)}ms` : '0ms';
+            document.getElementById('featuresRendered').textContent = performanceMetrics.featuresRendered;
+            document.getElementById('networkRequests').textContent = performanceMetrics.networkRequests;
+
+            // Update memory usage if available
+            if (performance.memory) {
+                const usedMB = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+                document.getElementById('memoryUsage').textContent = `${usedMB} MB`;
+            }
+        }
+
+        function updateSourceInfo(sourceType, url) {
+            const sourceInfo = document.getElementById('sourceInfo');
+            sourceInfo.innerHTML = `
+                <strong>Current Source:</strong> ${sourceType}<br>
+                <strong>URL:</strong> ${url}<br>
+                <strong>Type:</strong> Vector Tiles
+            `;
+        }
+
+        function clearAll() {
+            currentLayers.forEach(layerId => {
+                if (map.getLayer(layerId)) {
+                    map.removeLayer(layerId);
+                }
+            });
+            if (currentSource && map.getSource(currentSource)) {
+                map.removeSource(currentSource);
+            }
+            currentLayers = [];
+            currentSource = null;
+
+            // Reset metrics
+            performanceMetrics = {
+                tilesLoaded: 0,
+                totalLoadTime: 0,
+                featuresRendered: 0,
+                networkRequests: 0
+            };
+            updateMetrics();
+
+            document.getElementById('sourceInfo').innerHTML = 'No source loaded';
+            log('Cleared all layers and sources', 'info');
+        }
+
+        // Test functions
+        function testDynamicMVT() {
+            clearAll();
+            currentSource = 'parcels-dynamic-source';
+
+            const startTime = Date.now();
+
+            map.addSource(currentSource, {
+                type: 'vector',
+                tiles: [`${API_BASE}/tiles/simple/parcels/{z}/{x}/{y}/`],
+                minzoom: 10,
+                maxzoom: 17
+            });
+
+            // Add fill layer
+            const fillLayerId = 'parcels-fill';
+            map.addLayer({
+                id: fillLayerId,
+                type: 'fill',
+                source: currentSource,
+                'source-layer': 'vacant_parcels',
+                paint: layerStyles[0].fill
+            });
+            currentLayers.push(fillLayerId);
+
+            // Add outline layer
+            const outlineLayerId = 'parcels-outline';
+            map.addLayer({
+                id: outlineLayerId,
+                type: 'line',
+                source: currentSource,
+                'source-layer': 'vacant_parcels',
+                paint: layerStyles[0].outline
+            });
+            currentLayers.push(outlineLayerId);
+
+            updateSourceInfo('Dynamic MVT', `${API_BASE}/tiles/simple/parcels/{z}/{x}/{y}/`);
+            log('Loaded Dynamic MVT source', 'success');
+
+            const loadTime = Date.now() - startTime;
+            performanceMetrics.totalLoadTime += loadTime;
+            updateMetrics();
+        }
+
+        function testPrecomputedTiles() {
+            clearAll();
+            currentSource = 'parcels-precomputed-source';
+
+            const startTime = Date.now();
+
+            map.addSource(currentSource, {
+                type: 'vector',
+                tiles: [`${API_BASE}/tiles/parcels/{z}/{x}/{y}.pbf.zstd`],
+                minzoom: 10,
+                maxzoom: 17
+            });
+
+            // Add fill layer with correct source-layer name
+            const fillLayerId = 'parcels-precomputed-fill';
+            map.addLayer({
+                id: fillLayerId,
+                type: 'fill',
+                source: currentSource,
+                'source-layer': 'vacant_parcels',
+                paint: layerStyles[0].fill
+            });
+            currentLayers.push(fillLayerId);
+
+            // Add outline layer
+            const outlineLayerId = 'parcels-precomputed-outline';
+            map.addLayer({
+                id: outlineLayerId,
+                type: 'line',
+                source: currentSource,
+                'source-layer': 'vacant_parcels',
+                paint: layerStyles[0].outline
+            });
+            currentLayers.push(outlineLayerId);
+
+            updateSourceInfo('Precomputed Tiles', `${API_BASE}/tiles/parcels/{z}/{x}/{y}.pbf.zstd`);
+            log('Loaded Precomputed Tiles source', 'success');
+
+            const loadTime = Date.now() - startTime;
+            performanceMetrics.totalLoadTime += loadTime;
+            updateMetrics();
+        }
+
+        function loadGeoJSONCurrentView() {
+            clearAll();
+            currentSource = 'parcels-geojson-current';
+
+            const startTime = Date.now();
+
+            map.addSource(currentSource, {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            // Calculate current tile coordinates
+            const bounds = map.getBounds();
+            const zoom = Math.floor(map.getZoom());
+            const minTileX = Math.floor((bounds.getWest() + 180) / 360 * Math.pow(2, zoom));
+            const minTileY = Math.floor((1 - Math.log(Math.tan(bounds.getNorth() * Math.PI / 180) + 1 / Math.cos(bounds.getNorth() * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
+
+            const tileUrl = `${API_BASE}/tiles/geojson/parcels/${zoom}/${minTileX}/${minTileY}/?t=${Date.now()}`;
+
+            fetch(tileUrl)
+                .then(response => response.json())
+                .then(geojson => {
+                    const source = map.getSource(currentSource);
+                    if (source) {
+                        source.setData(geojson);
+                        performanceMetrics.featuresRendered = geojson.features.length;
+                        updateMetrics();
+                        log(`Loaded ${geojson.features.length} GeoJSON features for current view`, 'success');
+                    }
+                })
+                .catch(error => {
+                    log(`Failed to load GeoJSON for current view: ${error.message}`, 'error');
+                });
+
+            // Add fill layer
+            const fillLayerId = 'parcels-geojson-current-fill';
+            map.addLayer({
+                id: fillLayerId,
+                type: 'fill',
+                source: currentSource,
+                paint: layerStyles[0].fill
+            });
+            currentLayers.push(fillLayerId);
+
+            // Add outline layer
+            const outlineLayerId = 'parcels-geojson-current-outline';
+            map.addLayer({
+                id: outlineLayerId,
+                type: 'line',
+                source: currentSource,
+                paint: layerStyles[0].outline
+            });
+            currentLayers.push(outlineLayerId);
+
+            updateSourceInfo('GeoJSON (Current View)', tileUrl);
+            log('Loaded GeoJSON source for current view', 'success');
+
+            const loadTime = Date.now() - startTime;
+            performanceMetrics.totalLoadTime += loadTime;
+            updateMetrics();
+        }
+
+        function testGeoJSONComparison() {
+            clearAll();
+            currentSource = 'parcels-geojson-source';
+
+            const startTime = Date.now();
+
+            map.addSource(currentSource, {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            // Load a sample tile for comparison (Avignon area)
+            const sampleUrl = `${API_BASE}/tiles/geojson/parcels/12/2102/1490/?t=${Date.now()}`;
+
+            fetch(sampleUrl)
+                .then(response => response.json())
+                .then(geojson => {
+                    const source = map.getSource(currentSource);
+                    if (source) {
+                        source.setData(geojson);
+                        performanceMetrics.featuresRendered = geojson.features.length;
+                        updateMetrics();
+                        log(`Loaded ${geojson.features.length} GeoJSON features`, 'success');
+                    }
+                })
+                .catch(error => {
+                    log(`Failed to load GeoJSON: ${error.message}`, 'error');
+                });
+
+            // Add fill layer
+            const fillLayerId = 'parcels-geojson-fill';
+            map.addLayer({
+                id: fillLayerId,
+                type: 'fill',
+                source: currentSource,
+                paint: layerStyles[0].fill
+            });
+            currentLayers.push(fillLayerId);
+
+            // Add outline layer
+            const outlineLayerId = 'parcels-geojson-outline';
+            map.addLayer({
+                id: outlineLayerId,
+                type: 'line',
+                source: currentSource,
+                paint: layerStyles[0].outline
+            });
+            currentLayers.push(outlineLayerId);
+
+            updateSourceInfo('GeoJSON (Current)', sampleUrl);
+            log('Loaded GeoJSON source for comparison', 'success');
+
+            const loadTime = Date.now() - startTime;
+            performanceMetrics.totalLoadTime += loadTime;
+            updateMetrics();
+        }
+
+        function toggleFillLayer() {
+            if (currentLayers.length === 0) return;
+
+            const fillLayer = currentLayers.find(id => id.includes('fill'));
+            if (fillLayer && map.getLayer(fillLayer)) {
+                const visibility = map.getLayoutProperty(fillLayer, 'visibility');
+                map.setLayoutProperty(fillLayer, 'visibility',
+                    visibility === 'visible' ? 'none' : 'visible');
+                log(`Toggled fill layer: ${visibility === 'visible' ? 'hidden' : 'visible'}`, 'info');
+            }
+        }
+
+        function toggleOutlineLayer() {
+            if (currentLayers.length === 0) return;
+
+            const outlineLayer = currentLayers.find(id => id.includes('outline'));
+            if (outlineLayer && map.getLayer(outlineLayer)) {
+                const visibility = map.getLayoutProperty(outlineLayer, 'visibility');
+                map.setLayoutProperty(outlineLayer, 'visibility',
+                    visibility === 'visible' ? 'none' : 'visible');
+                log(`Toggled outline layer: ${visibility === 'visible' ? 'hidden' : 'visible'}`, 'info');
+            }
+        }
+
+        function changeLayerStyle() {
+            if (currentLayers.length === 0) return;
+
+            currentStyleIndex = (currentStyleIndex + 1) % layerStyles.length;
+            const newStyle = layerStyles[currentStyleIndex];
+
+            currentLayers.forEach(layerId => {
+                if (map.getLayer(layerId)) {
+                    const layerType = map.getLayer(layerId).type;
+                    if (layerType === 'fill') {
+                        map.setPaintProperty(layerId, 'fill-color', newStyle.fill['fill-color']);
+                        map.setPaintProperty(layerId, 'fill-opacity', newStyle.fill['fill-opacity']);
+                    } else if (layerType === 'line') {
+                        map.setPaintProperty(layerId, 'line-color', newStyle.outline['line-color']);
+                        map.setPaintProperty(layerId, 'line-width', newStyle.outline['line-width']);
+                    }
+                }
+            });
+
+            log(`Changed style to: ${newStyle.name}`, 'success');
+        }
+
+        function clearLog() {
+            document.getElementById('logOutput').innerHTML =
+                '<div class="log-entry info">Log cleared</div>';
+        }
+
+        // Event handlers
+        map.on('click', (e) => {
+            const features = map.queryRenderedFeatures(e.point);
+
+            if (features.length > 0) {
+                const feature = features[0];
+                const propertyDisplay = document.getElementById('propertyDisplay');
+
+                const properties = {
+                    'Layer ID': feature.layer.id,
+                    'Source Layer': feature.sourceLayer || 'N/A',
+                    'Geometry Type': feature.geometry.type,
+                    ...feature.properties
+                };
+
+                propertyDisplay.textContent = JSON.stringify(properties, null, 2);
+                log(`Clicked feature: ${feature.layer.id}`, 'info');
+            }
+        });
+
+        map.on('moveend', updateZoomInfo);
+        map.on('zoomend', updateZoomInfo);
+
+        function updateZoomInfo() {
+            const zoom = Math.round(map.getZoom() * 100) / 100;
+            const center = map.getCenter();
+            document.getElementById('zoomLevel').textContent = zoom;
+            document.getElementById('centerCoords').textContent =
+                `${center.lng.toFixed(4)}, ${center.lat.toFixed(4)}`;
+        }
+
+        // Monitor tile loading
+        map.on('sourcedata', (e) => {
+            if (e.sourceId && e.sourceId.includes('parcels')) {
+                if (e.isSourceLoaded) {
+                    performanceMetrics.tilesLoaded++;
+                    updateMetrics();
+                    log(`Source loaded: ${e.sourceId}`, 'success');
+                }
+            }
+        });
+
+        // Monitor tile loading errors
+        map.on('error', (e) => {
+            if (e.error && e.error.message) {
+                log(`MapLibre error: ${e.error.message}`, 'error');
+            }
+        });
+
+        // Monitor source loading errors
+        map.on('sourceerror', (e) => {
+            if (e.sourceId && e.sourceId.includes('parcels')) {
+                log(`Source error: ${e.sourceId}`, 'error');
+            }
+        });
+
+        // Monitor network requests (simplified)
+        const originalFetch = window.fetch;
+        window.fetch = function (...args) {
+            const url = args[0];
+            if (typeof url === 'string' && url.includes('/tiles/')) {
+                performanceMetrics.networkRequests++;
+                updateMetrics();
+
+                const startTime = Date.now();
+                return originalFetch.apply(this, args)
+                    .then(response => {
+                        const loadTime = Date.now() - startTime;
+                        performanceMetrics.totalLoadTime += loadTime;
+
+                        if (response.ok) {
+                            log(`Tile loaded: ${url} (${loadTime}ms, ${response.status})`, 'success');
+                        } else {
+                            log(`Tile failed: ${url} (${response.status} ${response.statusText})`, 'error');
+                        }
+
+                        updateMetrics();
+                        return response;
+                    })
+                    .catch(error => {
+                        const loadTime = Date.now() - startTime;
+                        performanceMetrics.totalLoadTime += loadTime;
+                        log(`Tile error: ${url} (${loadTime}ms) - ${error.message}`, 'error');
+                        updateMetrics();
+                        throw error;
+                    });
+            }
+            return originalFetch.apply(this, args);
+        };
+
+        // Initialize
+        updateZoomInfo();
+        updateMetrics();
+        log('Parcel Vector Tiles Test initialized', 'success');
+    </script>
+</body>
+
+</html>

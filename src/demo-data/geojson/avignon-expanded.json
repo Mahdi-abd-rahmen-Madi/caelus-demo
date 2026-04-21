@@ -1,0 +1,485 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0001",
+        "area": 450,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Faible",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 120,
+        "nearest_railway_distance_m": 350,
+        "slope_value": 2.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8059, 43.9493],
+          [4.8060, 43.9493],
+          [4.8060, 43.9494],
+          [4.8059, 43.9494],
+          [4.8059, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0002",
+        "area": 620,
+        "plu_zone_code": "AU",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 85,
+        "nearest_railway_distance_m": 420,
+        "slope_value": 1.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8061, 43.9493],
+          [4.8062, 43.9493],
+          [4.8062, 43.9494],
+          [4.8061, 43.9494],
+          [4.8061, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0003",
+        "area": 380,
+        "plu_zone_code": "NC",
+        "seismic_zone_class": "1",
+        "flood_zone_class": "Faible",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 200,
+        "nearest_railway_distance_m": 180,
+        "slope_value": 3.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8063, 43.9493],
+          [4.8064, 43.9493],
+          [4.8064, 43.9494],
+          [4.8063, 43.9494],
+          [4.8063, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0004",
+        "area": 510,
+        "plu_zone_code": "UL",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Élevé",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 95,
+        "nearest_railway_distance_m": 290,
+        "slope_value": 0.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8065, 43.9493],
+          [4.8066, 43.9493],
+          [4.8066, 43.9494],
+          [4.8065, 43.9494],
+          [4.8065, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0005",
+        "area": 720,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 150,
+        "nearest_railway_distance_m": 380,
+        "slope_value": 1.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8067, 43.9493],
+          [4.8068, 43.9493],
+          [4.8068, 43.9494],
+          [4.8067, 43.9494],
+          [4.8067, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0006",
+        "area": 480,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Faible",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 110,
+        "nearest_railway_distance_m": 320,
+        "slope_value": 2.3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8045, 43.9480],
+          [4.8046, 43.9480],
+          [4.8046, 43.9481],
+          [4.8045, 43.9481],
+          [4.8045, 43.9480]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0007",
+        "area": 550,
+        "plu_zone_code": "AU",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 75,
+        "nearest_railway_distance_m": 410,
+        "slope_value": 1.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8047, 43.9480],
+          [4.8048, 43.9480],
+          [4.8048, 43.9481],
+          [4.8047, 43.9481],
+          [4.8047, 43.9480]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0008",
+        "area": 390,
+        "plu_zone_code": "NC",
+        "seismic_zone_class": "1",
+        "flood_zone_class": "Faible",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 180,
+        "nearest_railway_distance_m": 150,
+        "slope_value": 4.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8049, 43.9480],
+          [4.8050, 43.9480],
+          [4.8050, 43.9481],
+          [4.8049, 43.9481],
+          [4.8049, 43.9480]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0009",
+        "area": 680,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Élevé",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 90,
+        "nearest_railway_distance_m": 280,
+        "slope_value": 0.6
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8051, 43.9480],
+          [4.8052, 43.9480],
+          [4.8052, 43.9481],
+          [4.8051, 43.9481],
+          [4.8051, 43.9480]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0010",
+        "area": 420,
+        "plu_zone_code": "UL",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 130,
+        "nearest_railway_distance_m": 360,
+        "slope_value": 1.9
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8053, 43.9480],
+          [4.8054, 43.9480],
+          [4.8054, 43.9481],
+          [4.8053, 43.9481],
+          [4.8053, 43.9480]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0011",
+        "area": 590,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Faible",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 160,
+        "nearest_railway_distance_m": 340,
+        "slope_value": 2.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8072, 43.9505],
+          [4.8073, 43.9505],
+          [4.8073, 43.9506],
+          [4.8072, 43.9506],
+          [4.8072, 43.9505]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0012",
+        "area": 460,
+        "plu_zone_code": "AU",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 80,
+        "nearest_railway_distance_m": 400,
+        "slope_value": 1.3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8074, 43.9505],
+          [4.8075, 43.9505],
+          [4.8075, 43.9506],
+          [4.8074, 43.9506],
+          [4.8074, 43.9505]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0013",
+        "area": 710,
+        "plu_zone_code": "NC",
+        "seismic_zone_class": "1",
+        "flood_zone_class": "Faible",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 190,
+        "nearest_railway_distance_m": 170,
+        "slope_value": 3.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8076, 43.9505],
+          [4.8077, 43.9505],
+          [4.8077, 43.9506],
+          [4.8076, 43.9506],
+          [4.8076, 43.9505]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0014",
+        "area": 530,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Élevé",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 100,
+        "nearest_railway_distance_m": 300,
+        "slope_value": 0.9
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8078, 43.9505],
+          [4.8079, 43.9505],
+          [4.8079, 43.9506],
+          [4.8078, 43.9506],
+          [4.8078, 43.9505]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0015",
+        "area": 650,
+        "plu_zone_code": "UL",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 140,
+        "nearest_railway_distance_m": 370,
+        "slope_value": 1.7
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8080, 43.9505],
+          [4.8081, 43.9505],
+          [4.8081, 43.9506],
+          [4.8080, 43.9506],
+          [4.8080, 43.9505]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0016",
+        "area": 440,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Faible",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 125,
+        "nearest_railway_distance_m": 355,
+        "slope_value": 2.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8030, 43.9510],
+          [4.8031, 43.9510],
+          [4.8031, 43.9511],
+          [4.8030, 43.9511],
+          [4.8030, 43.9510]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0017",
+        "area": 580,
+        "plu_zone_code": "AU",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 88,
+        "nearest_railway_distance_m": 415,
+        "slope_value": 1.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8032, 43.9510],
+          [4.8033, 43.9510],
+          [4.8033, 43.9511],
+          [4.8032, 43.9511],
+          [4.8032, 43.9510]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0018",
+        "area": 370,
+        "plu_zone_code": "NC",
+        "seismic_zone_class": "1",
+        "flood_zone_class": "Faible",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 210,
+        "nearest_railway_distance_m": 160,
+        "slope_value": 4.3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8034, 43.9510],
+          [4.8035, 43.9510],
+          [4.8035, 43.9511],
+          [4.8034, 43.9511],
+          [4.8034, 43.9510]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0019",
+        "area": 690,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Élevé",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 92,
+        "nearest_railway_distance_m": 275,
+        "slope_value": 0.7
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8036, 43.9510],
+          [4.8037, 43.9510],
+          [4.8037, 43.9511],
+          [4.8036, 43.9511],
+          [4.8036, 43.9510]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0020",
+        "area": 520,
+        "plu_zone_code": "UL",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84",
+        "nearest_enedis_distance_m": 135,
+        "nearest_railway_distance_m": 365,
+        "slope_value": 1.6
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8038, 43.9510],
+          [4.8039, 43.9510],
+          [4.8039, 43.9511],
+          [4.8038, 43.9511],
+          [4.8038, 43.9510]
+        ]]
+      }
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preconnection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>WMS Preconnection Test</h1>
+    
+    <div id="status" class="status info">Testing preconnection...</div>
+    
+    <h2>Preconnection Links</h2>
+    <div id="links"></div>
+    
+    <h2>Preconnection Status</h2>
+    <div id="preconnection-status"></div>
+    
+    <h2>Network Requests</h2>
+    <div id="network-requests"></div>
+
+    <script>
+        // Test CarmenCarto preconnection
+        function testPreconnection() {
+            const statusDiv = document.getElementById('status');
+            const linksDiv = document.getElementById('links');
+            const preconnectionStatusDiv = document.getElementById('preconnection-status');
+            const networkRequestsDiv = document.getElementById('network-requests');
+            
+            // Check for preconnection links
+            const preconnectLinks = document.querySelectorAll('link[rel="preconnect"]');
+            const dnsPrefetchLinks = document.querySelectorAll('link[rel="dns-prefetch"]');
+            
+            linksDiv.innerHTML = `
+                <h3>Found ${preconnectLinks.length} preconnect links:</h3>
+                <pre>${Array.from(preconnectLinks).map(link => 
+                    `href="${link.href}" crossorigin="${link.getAttribute('crossorigin') || 'none'}`
+                ).join('\n')}</pre>
+                
+                <h3>Found ${dnsPrefetchLinks.length} DNS prefetch links:</h3>
+                <pre>${Array.from(dnsPrefetchLinks).map(link => 
+                    `href="${link.href}"`
+                ).join('\n')}</pre>
+            `;
+            
+            // Check for CarmenCarto specific links
+            const carmencartoPreconnect = Array.from(preconnectLinks).find(link => 
+                link.href.includes('carmencarto.fr')
+            );
+            
+            const carmencartoDns = Array.from(dnsPrefetchLinks).find(link => 
+                link.href.includes('carmencarto.fr')
+            );
+            
+            if (carmencartoPreconnect && carmencartoDns) {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = 'SUCCESS: CarmenCarto preconnection links found!';
+                
+                preconnectionStatusDiv.innerHTML = `
+                    <div class="status success">
+                        CarmenCarto preconnection is properly configured:
+                        <ul>
+                            <li>Preconnect link: ${carmencartoPreconnect.href}</li>
+                            <li>DNS prefetch link: ${carmencartoDns.href}</li>
+                            <li>CORS attribute: ${carmencartoPreconnect.getAttribute('crossorigin')}</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                statusDiv.className = 'status info';
+                statusDiv.textContent = 'CarmenCarto preconnection links not found - may need to initialize WMS preconnection';
+            }
+            
+            // Monitor network requests
+            const requests = [];
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                requests.push({
+                    url: args[0],
+                    timestamp: new Date().toISOString(),
+                    method: args[1]?.method || 'GET'
+                });
+                return originalFetch.apply(this, args);
+            };
+            
+            // Test actual CarmenCarto request
+            setTimeout(() => {
+                fetch('https://ws.carmencarto.fr/WMS/168/zonage_sismique?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetCapabilities')
+                    .then(response => {
+                        networkRequestsDiv.innerHTML = `
+                            <h3>Network Requests (${requests.length}):</h3>
+                            <pre>${requests.map(req => 
+                                `${req.timestamp} - ${req.method} ${req.url}`
+                            ).join('\n')}</pre>
+                            
+                            <div class="status success">
+                                CarmenCarto WMS service is accessible! Status: ${response.status}
+                            </div>
+                        `;
+                    })
+                    .catch(error => {
+                        networkRequestsDiv.innerHTML = `
+                            <h3>Network Requests (${requests.length}):</h3>
+                            <pre>${requests.map(req => 
+                                `${req.timestamp} - ${req.method} ${req.url}`
+                            ).join('\n')}</pre>
+                            
+                            <div class="status info">
+                                CarmenCarto WMS service error: ${error.message}
+                            </div>
+                        `;
+                    });
+            }, 1000);
+        }
+        
+        // Run test after page loads
+        window.addEventListener('load', () => {
+            setTimeout(testPreconnection, 500);
+        });
+    </script>
+</body>
+</html>

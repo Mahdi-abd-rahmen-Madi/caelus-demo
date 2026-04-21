@@ -1,0 +1,110 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0001",
+        "area": 450,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Faible",
+        "department_code": "84"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8059, 43.9493],
+          [4.8060, 43.9493],
+          [4.8060, 43.9494],
+          [4.8059, 43.9494],
+          [4.8059, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0002",
+        "area": 620,
+        "plu_zone_code": "AU",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8061, 43.9493],
+          [4.8062, 43.9493],
+          [4.8062, 43.9494],
+          [4.8061, 43.9494],
+          [4.8061, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0003",
+        "area": 380,
+        "plu_zone_code": "NC",
+        "seismic_zone_class": "1",
+        "flood_zone_class": "Faible",
+        "department_code": "84"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8063, 43.9493],
+          [4.8064, 43.9493],
+          [4.8064, 43.9494],
+          [4.8063, 43.9494],
+          [4.8063, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0004",
+        "area": 510,
+        "plu_zone_code": "UL",
+        "seismic_zone_class": "2",
+        "flood_zone_class": "Élevé",
+        "department_code": "84"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8065, 43.9493],
+          [4.8066, 43.9493],
+          [4.8066, 43.9494],
+          [4.8065, 43.9494],
+          [4.8065, 43.9493]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "parcel_id": "84000_0005",
+        "area": 720,
+        "plu_zone_code": "U",
+        "seismic_zone_class": "3",
+        "flood_zone_class": "Moyen",
+        "department_code": "84"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [4.8067, 43.9493],
+          [4.8068, 43.9493],
+          [4.8068, 43.9494],
+          [4.8067, 43.9494],
+          [4.8067, 43.9493]
+        ]]
+      }
+    }
+  ]
+}

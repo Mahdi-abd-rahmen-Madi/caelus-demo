@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTE Tile Test</title>
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 600px;
+            width: 100%;
+            border: 1px solid #ccc;
+        }
+
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+
+        .control-group {
+            margin: 10px 0;
+        }
+
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+
+        select,
+        input {
+            padding: 5px;
+            margin-left: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            background: #007cbf;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #005a87;
+        }
+
+        .info {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e7f3ff;
+            border-left: 4px solid #007cbf;
+        }
+
+        .error {
+            margin: 10px 0;
+            padding: 10px;
+            background: #ffe7e7;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .success {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e7ffe7;
+            border-left: 4px solid #4caf50;
+        }
+
+        #log {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>RTE Tile Testing</h1>
+
+    <div class="info">
+        <strong>Test Configuration:</strong> This page tests the RTE tile serving functionality from the backend.
+        <br><strong>Expected Backend URL:</strong> http://localhost:8000/api/geodata/tiles/rte/{z}/{x}/{y}
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Backend URL:</label>
+            <input type="text" id="backendUrl" value="http://localhost:8000/api/geodata/tiles/rte"
+                style="width: 300px;">
+        </div>
+
+        <div class="control-group">
+            <label>Line Type:</label>
+            <select id="lineType">
+                <option value="">All Types</option>
+                <option value="aerien">Aerien (Overhead)</option>
+                <option value="souterrain">Souterrain (Underground)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Min Voltage:</label>
+            <select id="voltageMin">
+                <option value="">Any</option>
+                <option value="45kV">45kV</option>
+                <option value="63kV">63kV</option>
+                <option value="90kV">90kV</option>
+                <option value="150kV">150kV</option>
+                <option value="225kV">225kV</option>
+                <option value="400kV">400kV</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Max Voltage:</label>
+            <select id="voltageMax">
+                <option value="">Any</option>
+                <option value="45kV">45kV</option>
+                <option value="63kV">63kV</option>
+                <option value="90kV">90kV</option>
+                <option value="150kV">150kV</option>
+                <option value="225kV">225kV</option>
+                <option value="400kV">400kV</option>
+            </select>
+        </div>
+
+        <button onclick="updateMap()">Update Map</button>
+        <button onclick="testDirectRequest()">Test Direct Request</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="status"></div>
+    <div id="log"></div>
+
+    <script>
+        let map;
+        let rteSource;
+
+        // Initialize map centered on France
+        function initMap() {
+            map = new maplibregl.Map({
+                container: 'map',
+                style: {
+                    version: 8,
+                    sources: {
+                        'osm': {
+                            type: 'raster',
+                            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                            tileSize: 256,
+                            attribution: '© OpenStreetMap contributors'
+                        }
+                    },
+                    layers: [
+                        {
+                            id: 'osm',
+                            type: 'raster',
+                            source: 'osm'
+                        }
+                    ]
+                },
+                center: [2.3522, 48.8566], // Paris
+                zoom: 6
+            });
+
+            map.on('load', function () {
+                log('Map loaded successfully');
+                updateMap();
+            });
+
+            map.on('error', function (e) {
+                log('Map error: ' + e.error.message, 'error');
+            });
+        }
+
+        function buildTileUrl() {
+            const baseUrl = document.getElementById('backendUrl').value;
+            const params = new URLSearchParams();
+
+            const lineType = document.getElementById('lineType').value;
+            const voltageMin = document.getElementById('voltageMin').value;
+            const voltageMax = document.getElementById('voltageMax').value;
+
+            if (lineType) params.append('line_type', lineType);
+            if (voltageMin) params.append('voltage_min', voltageMin);
+            if (voltageMax) params.append('voltage_max', voltageMax);
+
+            const queryString = params.toString();
+            return baseUrl + '/{z}/{x}/{y}/' + (queryString ? '?' + queryString : '');
+        }
+
+        function updateMap() {
+            const tileUrl = buildTileUrl();
+
+            log(`Updating map with tile URL: ${tileUrl}`);
+
+            // Remove existing source and layer if they exist
+            if (map.getLayer('rte-lines')) {
+                map.removeLayer('rte-lines');
+            }
+            if (map.getSource('rte-source')) {
+                map.removeSource('rte-source');
+            }
+
+            // Add new source
+            map.addSource('rte-source', {
+                type: 'vector',
+                tiles: [tileUrl],
+                minzoom: 0,
+                maxzoom: 15
+            });
+
+            // Add layer for RTE lines
+            map.addLayer({
+                id: 'rte-lines',
+                type: 'line',
+                source: 'rte-source',
+                'source-layer': 'rte_tile',
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': [
+                        'match',
+                        ['get', 'line_type'],
+                        'aerien', '#ff6b6b',
+                        'souterrain', '#4ecdc4',
+                        '#888888'
+                    ],
+                    'line-width': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        5, 1,
+                        10, 2,
+                        15, 4
+                    ],
+                    'line-opacity': 0.8
+                }
+            });
+
+            // Add click handler for feature inspection
+            map.on('click', 'rte-lines', function (e) {
+                if (e.features.length > 0) {
+                    const feature = e.features[0];
+                    const props = feature.properties;
+                    showStatus(`RTE Line: ${props.line_type}, ${props.tension}, ${props.etat}`, 'success');
+                    log(`Clicked feature: ${JSON.stringify(props, null, 2)}`);
+                }
+            });
+
+            // Change cursor on hover
+            map.on('mouseenter', 'rte-lines', function () {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            map.on('mouseleave', 'rte-lines', function () {
+                map.getCanvas().style.cursor = '';
+            });
+
+            showStatus('Map updated with RTE tiles', 'success');
+        }
+
+        async function testDirectRequest() {
+            const baseUrl = document.getElementById('backendUrl').value;
+            const testUrl = baseUrl + '/7/63/44/'; // Test tile coordinates with trailing slash
+
+            log(`Testing direct request to: ${testUrl}`);
+
+            try {
+                const response = await fetch(testUrl);
+                log(`Response status: ${response.status} ${response.statusText}`);
+                log(`Response headers: ${JSON.stringify(Object.fromEntries(response.headers), null, 2)}`);
+
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    log(`Content-Type: ${contentType}`);
+
+                    if (contentType && contentType.includes('application/vnd.mapbox-vector-tile')) {
+                        const arrayBuffer = await response.arrayBuffer();
+                        log(`Received MVT data: ${arrayBuffer.byteLength} bytes`);
+                        showStatus('Direct request successful - MVT data received', 'success');
+                    } else if (response.status === 204) {
+                        log('Received empty tile (HTTP 204)');
+                        showStatus('Direct request successful - empty tile (no data in area)', 'success');
+                    } else {
+                        const text = await response.text();
+                        log(`Response content: ${text}`);
+                        showStatus('Direct request successful - unexpected content type', 'error');
+                    }
+                } else {
+                    const text = await response.text();
+                    log(`Error response: ${text}`);
+                    showStatus(`Direct request failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`Request error: ${error.message}`, 'error');
+                showStatus(`Direct request failed: ${error.message}`, 'error');
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = type;
+            statusDiv.textContent = message;
+
+            // Auto-clear after 5 seconds
+            setTimeout(() => {
+                if (statusDiv.textContent === message) {
+                    statusDiv.textContent = '';
+                    statusDiv.className = '';
+                }
+            }, 5000);
+        }
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#d32f2f' : type === 'success' ? '#4caf50' : '#333';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Initialize map when page loads
+        window.onload = function () {
+            initMap();
+        };
+    </script>
+</body>
+
+</html>

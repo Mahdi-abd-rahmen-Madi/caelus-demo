@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enedis WMS Data - Electrical Network Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .layer-controls {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .layer-controls h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+
+        .layer-group {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .layer-group:last-child {
+            border-bottom: none;
+        }
+
+        .layer-group h5 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .layer-controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .layer-controls input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .opacity-control {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .opacity-control label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .opacity-control input[type="range"] {
+            width: 100%;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="info-panel">
+        <h3>⚡ Enedis Electrical Network</h3>
+        <p><strong>Source:</strong> Enedis WMS Service</p>
+        <p><strong>Service:</strong> WMS 1.3.0</p>
+        <p><strong>CRS:</strong> EPSG:3857</p>
+        <p><strong>Format:</strong> PNG</p>
+        <p style="margin-top: 10px; font-size: 12px; color: #777;">
+            This map displays electrical network data from Enedis (French electricity distribution network).
+            Includes electrical substations, HTA lines, and BT lines.
+        </p>
+        <div id="coords" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 12px;">
+        </div>
+    </div>
+
+    <div class="layer-controls">
+        <h4>Layer Controls</h4>
+
+        <!-- Aerial Network Layers -->
+        <div class="layer-group">
+            <h5>⚡ Aerial Networks</h5>
+            <label>
+                <input type="checkbox" id="posteElectrique" checked>
+                🏢 Electrical Substations
+            </label>
+            <label>
+                <input type="checkbox" id="posteSource" checked>
+                ⚡ Source Substations
+            </label>
+            <label>
+                <input type="checkbox" id="poteauElectrique" checked>
+                🏛️ Electrical Poles
+            </label>
+            <label>
+                <input type="checkbox" id="htaLines" checked>
+                🔌 HTA Lines (Aerial)
+            </label>
+            <label>
+                <input type="checkbox" id="btLines" checked>
+                🔌 BT Lines (Aerial)
+            </label>
+        </div>
+
+        <!-- Underground Network Layers -->
+        <div class="layer-group">
+            <h5>🏔️ Underground Networks</h5>
+            <label>
+                <input type="checkbox" id="htaLinesUnderground" checked>
+                🔌 HTA Lines (Underground)
+            </label>
+            <label>
+                <input type="checkbox" id="btLinesUnderground" checked>
+                🔌 BT Lines (Underground)
+            </label>
+        </div>
+
+        <div class="opacity-control">
+            <label for="opacitySlider">Layer Opacity: <span id="opacityValue">70%</span></label>
+            <input type="range" id="opacitySlider" min="0" max="100" value="70">
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <p>Loading Enedis electrical network data...</p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([48.8566, 2.3522], 12); // Paris area as default
+
+        // Add OpenStreetMap base layer
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        });
+
+        // Add satellite base layer option
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri',
+            maxZoom: 19
+        });
+
+        // Default base layer
+        osmLayer.addTo(map);
+
+        // Enedis WMS Layer Configuration
+        const wmsBaseUrl = 'https://geobretagne.fr/geoserver/enedis/wms';
+
+        // Electrical substations layer
+        const posteElectriqueLayer = L.tileLayer.wms(wmsBaseUrl, {
+            layers: 'poste_electrique',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: '© Enedis - French Electricity Distribution Network'
+        });
+
+        // Source substations layer
+        const posteSourceLayer = L.tileLayer.wms(wmsBaseUrl, {
+            layers: 'poste_source',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: '© Enedis - French Electricity Distribution Network'
+        });
+
+        // Electrical poles layer
+        const poteauElectriqueLayer = L.tileLayer.wms(wmsBaseUrl, {
+            layers: 'poteau_electrique',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: '© Enedis - French Electricity Distribution Network'
+        });
+
+        // HTA lines layer
+        const htaLinesLayer = L.tileLayer.wms(wmsBaseUrl, {
+            layers: 'reseau_hta',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: '© Enedis - French Electricity Distribution Network'
+        });
+
+        // BT lines layer
+        const btLinesLayer = L.tileLayer.wms(wmsBaseUrl, {
+            layers: 'reseau_bt',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: '© Enedis - French Electricity Distribution Network'
+        });
+
+        // HTA underground lines layer
+        const htaLinesUndergroundLayer = L.tileLayer.wms(wmsBaseUrl, {
+            layers: 'reseau_souterrain_hta',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.8,
+            attribution: '© Enedis - French Electricity Distribution Network'
+        });
+
+        // BT underground lines layer
+        const btLinesUndergroundLayer = L.tileLayer.wms(wmsBaseUrl, {
+            layers: 'reseau_souterrain_bt',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.8,
+            attribution: '© Enedis - French Electricity Distribution Network'
+        });
+
+        // Add all layers to map
+        posteElectriqueLayer.addTo(map);
+        posteSourceLayer.addTo(map);
+        poteauElectriqueLayer.addTo(map);
+        htaLinesLayer.addTo(map);
+        btLinesLayer.addTo(map);
+        htaLinesUndergroundLayer.addTo(map);
+        btLinesUndergroundLayer.addTo(map);
+
+        // Layer controls
+        const baseLayers = {
+            "OpenStreetMap": osmLayer,
+            "Satellite": satelliteLayer
+        };
+
+        const overlayLayers = {
+            "Electrical Substations": posteElectriqueLayer,
+            "Source Substations": posteSourceLayer,
+            "Electrical Poles": poteauElectriqueLayer,
+            "HTA Lines (Aerial)": htaLinesLayer,
+            "BT Lines (Aerial)": btLinesLayer,
+            "HTA Lines (Underground)": htaLinesUndergroundLayer,
+            "BT Lines (Underground)": btLinesUndergroundLayer
+        };
+
+        L.control.layers(baseLayers, overlayLayers, {
+            position: 'bottomleft'
+        }).addTo(map);
+
+        // Add geocoder for search functionality
+        L.Control.geocoder({
+            defaultMarkGeocode: false,
+            position: 'topleft',
+            placeholder: 'Search location...',
+            errorMessage: 'Location not found.',
+            showResultIcons: true,
+            suggestMinLength: 2,
+            suggestTimeout: 250,
+            queryMinLength: 1,
+            geocoder: L.Control.Geocoder.nominatim()
+        }).on('markgeocode', function (e) {
+            const bbox = e.geocode.bbox;
+            const poly = L.polygon([
+                bbox.getSouthEast(),
+                bbox.getNorthEast(),
+                bbox.getNorthWest(),
+                bbox.getSouthWest()
+            ]);
+            map.fitBounds(poly.getBounds());
+        }).addTo(map);
+
+        // Layer visibility controls
+        document.getElementById('posteElectrique').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                posteElectriqueLayer.addTo(map);
+            } else {
+                map.removeLayer(posteElectriqueLayer);
+            }
+        });
+
+        document.getElementById('posteSource').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                posteSourceLayer.addTo(map);
+            } else {
+                map.removeLayer(posteSourceLayer);
+            }
+        });
+
+        document.getElementById('poteauElectrique').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                poteauElectriqueLayer.addTo(map);
+            } else {
+                map.removeLayer(poteauElectriqueLayer);
+            }
+        });
+
+        document.getElementById('htaLines').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                htaLinesLayer.addTo(map);
+            } else {
+                map.removeLayer(htaLinesLayer);
+            }
+        });
+
+        document.getElementById('btLines').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                btLinesLayer.addTo(map);
+            } else {
+                map.removeLayer(btLinesLayer);
+            }
+        });
+
+        document.getElementById('htaLinesUnderground').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                htaLinesUndergroundLayer.addTo(map);
+            } else {
+                map.removeLayer(htaLinesUndergroundLayer);
+            }
+        });
+
+        document.getElementById('btLinesUnderground').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                btLinesUndergroundLayer.addTo(map);
+            } else {
+                map.removeLayer(btLinesUndergroundLayer);
+            }
+        });
+
+        // Opacity control for all layers
+        const opacitySlider = document.getElementById('opacitySlider');
+        const opacityValue = document.getElementById('opacityValue');
+
+        opacitySlider.addEventListener('input', function (e) {
+            const opacity = e.target.value / 100;
+            posteElectriqueLayer.setOpacity(opacity);
+            posteSourceLayer.setOpacity(opacity);
+            poteauElectriqueLayer.setOpacity(opacity);
+            htaLinesLayer.setOpacity(opacity);
+            btLinesLayer.setOpacity(opacity);
+            htaLinesUndergroundLayer.setOpacity(opacity);
+            btLinesUndergroundLayer.setOpacity(opacity);
+            opacityValue.textContent = e.target.value + '%';
+        });
+
+        // Add scale control
+        L.control.scale({
+            position: 'bottomright',
+            metric: true,
+            imperial: false
+        }).addTo(map);
+
+        // Add coordinates display
+        map.on('mousemove', function (e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+
+            document.getElementById('coords').innerHTML =
+                `<strong>Coordinates:</strong><br>Lat: ${lat}<br>Lng: ${lng}`;
+        });
+
+        // Hide loading message after map loads
+        setTimeout(function () {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }, 2000);
+
+        // Add click event to get WMS feature info
+        map.on('click', function (e) {
+            const point = map.latLngToContainerPoint(e.latlng, map.getZoom());
+            const size = map.getSize();
+            const bounds = map.getBounds();
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
+
+            console.log('Clicked at:', e.latlng);
+            console.log('Map bounds:', bounds);
+
+            // You can add GetFeatureInfo request here if needed
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            map.invalidateSize();
+        });
+    </script>
+</body>
+
+</html>

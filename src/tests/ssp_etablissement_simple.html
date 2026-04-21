@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS SSP - Établissements (Simple)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 280px;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .opacity-control {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .opacity-control label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .opacity-control input[type="range"] {
+            width: 120px;
+        }
+
+        .attribution {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="info-panel">
+        <h3>🗺️ SSP - Sites et Sols Pollués</h3>
+        <p><strong>Service:</strong> BRGM Georisques</p>
+        <p><strong>Couches:</strong> SSP_WMS</p>
+        <p><strong>Version:</strong> WMS 1.1.1</p>
+        <p style="font-size: 11px; color: #777; margin-top: 8px;">
+            Secteurs d'Information sur les Sols - Établissements et Instructions
+        </p>
+
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
+            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #2c3e50;">🎛️ Couches</h4>
+
+            <h5 style="margin: 8px 0 5px 0; font-size: 11px; color: #e74c3c;">🏭 SSP (Pollution)</h5>
+            <label style="display: block; margin-bottom: 6px; font-size: 12px; cursor: pointer;">
+                <input type="checkbox" id="etablissementLayer" checked> 🏭 SSP_ETABLISSEMENT
+            </label>
+            <div style="font-size: 10px; color: #777; margin-left: 20px; margin-top: -5px; margin-bottom: 8px;">
+                Anciens sites industriels et activités de service
+            </div>
+            <label style="display: block; margin-bottom: 6px; font-size: 12px; cursor: pointer;">
+                <input type="checkbox" id="instructionLayer" checked> ⚠️ SSP_INSTRUCTION
+            </label>
+            <div
+                style="font-size: 10px; color: #777; margin-left: 20px; margin-top: -5px; margin-bottom: 8px; line-height: 1.3;">
+                Sites pollués ou potentiellement pollués appelant une action des pouvoirs publics, à titre préventif ou
+                curatif (ex-BASOL)
+            </div>
+            <label style="display: block; margin-bottom: 6px; font-size: 12px; cursor: pointer;">
+                <input type="checkbox" id="classificationSisLayer"> 📊 SSP_CLASSIFICATION_SIS
+            </label>
+            <div
+                style="font-size: 10px; color: #777; margin-left: 20px; margin-top: -5px; margin-bottom: 8px; line-height: 1.3;">
+                <strong>Secteurs d'Information sur les Sols (SIS)</strong><br>
+                L'article L.125-6 du code de l'environnement modifié par l'article 173 de la loi ALUR, du 26 mars 2014
+                prévoit que l'État élabore, au regard des informations dont il dispose, des Secteurs d'Information sur
+                les Sols (SIS). Ceux-ci doivent comprendre les terrains où la connaissance de la pollution des sols
+                justifie (notamment en cas de changement d'usage) la réalisation d'études de sols et de mesures de
+                gestion de la pollution pour préserver la sécurité, la santé ou la salubrité publique et
+                l'environnement. Le décret n° 2015-1353 du 26 octobre 2015 définit les modalités d'application.
+            </div>
+
+            <h5 style="margin: 12px 0 5px 0; font-size: 11px; color: #3498db;">🗺️ Base & Référence</h5>
+            <label style="display: block; margin-bottom: 6px; font-size: 12px; cursor: pointer;">
+                <input type="checkbox" id="adresseRouteLayer"> 🛣️ ADRESSE_ROUTE
+            </label>
+            <label style="display: block; margin-bottom: 8px; font-size: 12px; cursor: pointer;">
+                <input type="checkbox" id="orthophotoLayer"> 📷 ORTHOPHOTOS
+            </label>
+        </div>
+    </div>
+
+    <div class="opacity-control">
+        <label for="opacitySlider">Opacité: <span id="opacityValue">70%</span></label>
+        <input type="range" id="opacitySlider" min="0" max="100" value="70">
+    </div>
+
+    <div class="attribution">
+        © BRGM - Bureau de Recherches Géologiques et Minières
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map centered on France (Lyon area from your BBOX)
+        const map = L.map('map').setView([45.7640, 4.8357], 12);
+
+        // Add OpenStreetMap base layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // WMS Layers
+        const etablissementLayer = L.tileLayer.wms('https://mapsref.brgm.fr/wxs/georisques/risques', {
+            layers: 'SSP_ETABLISSEMENT',
+            format: 'image/png',
+            transparent: true,
+            version: '1.1.1',
+            styles: 'default',
+            opacity: 0.7,
+            attribution: '© BRGM - French Geological Survey'
+        });
+
+        const instructionLayer = L.tileLayer.wms('https://mapsref.brgm.fr/wxs/georisques/risques', {
+            layers: 'SSP_INSTRUCTION',
+            format: 'image/png',
+            transparent: true,
+            version: '1.1.1',
+            styles: 'default',
+            opacity: 0.7,
+            attribution: '© BRGM - French Geological Survey'
+        });
+
+        const adresseRouteLayer = L.tileLayer.wms('https://mapsref.brgm.fr/wxs/refcom-brgm/refign', {
+            layers: 'ADRESSE_ROUTE',
+            format: 'image/png',
+            transparent: true,
+            version: '1.1.1',
+            styles: 'default',
+            opacity: 0.8,
+            attribution: '© BRGM - French Geological Survey'
+        });
+
+        const orthophotoLayer = L.tileLayer.wms('https://data.geopf.fr/wms-r/wms', {
+            layers: 'ORTHOIMAGERY.ORTHOPHOTOS.BDORTHO',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            styles: '',
+            opacity: 1.0,
+            attribution: '© IGN - France'
+        });
+
+        const classificationSisLayer = L.tileLayer.wms('https://mapsref.brgm.fr/wxs/georisques/risques', {
+            layers: 'SSP_CLASSIFICATION_SIS',
+            format: 'image/png',
+            transparent: true,
+            version: '1.1.1',
+            styles: 'default',
+            opacity: 0.7,
+            attribution: '© BRGM - French Geological Survey'
+        });
+
+        // Add SSP layers to map by default
+        etablissementLayer.addTo(map);
+        instructionLayer.addTo(map);
+
+        // Layer visibility controls
+        document.getElementById('etablissementLayer').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                etablissementLayer.addTo(map);
+            } else {
+                map.removeLayer(etablissementLayer);
+            }
+        });
+
+        document.getElementById('instructionLayer').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                instructionLayer.addTo(map);
+            } else {
+                map.removeLayer(instructionLayer);
+            }
+        });
+
+        document.getElementById('adresseRouteLayer').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                adresseRouteLayer.addTo(map);
+            } else {
+                map.removeLayer(adresseRouteLayer);
+            }
+        });
+
+        document.getElementById('orthophotoLayer').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                orthophotoLayer.addTo(map);
+            } else {
+                map.removeLayer(orthophotoLayer);
+            }
+        });
+
+        document.getElementById('classificationSisLayer').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                classificationSisLayer.addTo(map);
+            } else {
+                map.removeLayer(classificationSisLayer);
+            }
+        });
+
+        // Global opacity control (affects SSP layers only)
+        const opacitySlider = document.getElementById('opacitySlider');
+        const opacityValue = document.getElementById('opacityValue');
+
+        opacitySlider.addEventListener('input', function (e) {
+            const opacity = e.target.value / 100;
+            etablissementLayer.setOpacity(opacity);
+            instructionLayer.setOpacity(opacity);
+            classificationSisLayer.setOpacity(opacity);
+            opacityValue.textContent = e.target.value + '%';
+        });
+
+        // Add scale control
+        L.control.scale({ position: 'bottomright', metric: true }).addTo(map);
+
+        // Error handling
+        etablissementLayer.on('tileerror', function (error) {
+            console.warn('SSP_ETABLISSEMENT tile loading error:', error);
+        });
+
+        instructionLayer.on('tileerror', function (error) {
+            console.warn('SSP_INSTRUCTION tile loading error:', error);
+        });
+
+        adresseRouteLayer.on('tileerror', function (error) {
+            console.warn('ADRESSE_ROUTE tile loading error:', error);
+        });
+
+        orthophotoLayer.on('tileerror', function (error) {
+            console.warn('ORTHOPHOTOS tile loading error:', error);
+        });
+
+        classificationSisLayer.on('tileerror', function (error) {
+            console.warn('SSP_CLASSIFICATION_SIS tile loading error:', error);
+        });
+
+        console.log('Map initialized with 5 layers:');
+        console.log('- SSP_ETABLISSEMENT (BRGM)');
+        console.log('- SSP_INSTRUCTION (BRGM)');
+        console.log('- SSP_CLASSIFICATION_SIS (BRGM)');
+        console.log('- ADRESSE_ROUTE (BRGM refcom)');
+        console.log('- ORTHOPHOTOS (Geoportail)');
+        console.log('Press R to reset view');
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'r' || e.key === 'R') {
+                map.setView([45.7640, 4.8357], 12);
+            }
+        });
+    </script>
+</body>
+
+</html>

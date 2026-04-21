@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRGM Georisques WMS Layers Viewer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .layer-controls {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 280px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .layer-controls h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .layer-group {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .layer-group:last-child {
+            border-bottom: none;
+        }
+
+        .layer-controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .layer-controls input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .opacity-control {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .opacity-control label {
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .opacity-control input[type="range"] {
+            width: 100%;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .layer-info {
+            font-size: 11px;
+            color: #777;
+            margin-left: 20px;
+            margin-top: -5px;
+            margin-bottom: 8px;
+        }
+
+        .coordinates {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+        }
+
+        .attribution {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="info-panel">
+        <h3>🗺️ BRGM Georisques WMS</h3>
+        <p><strong>Service:</strong> Multiple WMS services</p>
+        <p><strong>Provider:</strong> BRGM - French Geological Survey</p>
+        <p><strong>Format:</strong> WMS 1.3.0, PNG</p>
+        <p><strong>CRS:</strong> EPSG:3857</p>
+        <p style="margin-top: 10px; font-size: 12px; color: #777;">
+            This map displays various natural and industrial risk layers from BRGM Georisques portal.
+            Use the layer controls to toggle different risk types.
+        </p>
+        <div class="coordinates" id="coords">
+            <strong>Coordinates:</strong><br>
+            <span id="coordText">Move mouse over map</span>
+        </div>
+    </div>
+
+    <div class="layer-controls">
+        <h4>🎛️ Risk Layer Controls</h4>
+
+        <!-- Water/Inundation Risks -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #3498db;">💧 Water Risks</h5>
+            <label>
+                <input type="checkbox" id="floodLayer" checked>
+                🌊 Flood Risk (SUP_INOND)
+            </label>
+            <div class="layer-info">Areas with potential flood inundation risks</div>
+
+            <label>
+                <input type="checkbox" id="groundwaterSedim">
+                💧 Groundwater Rise - Sedimentary (REM_NAPPE_SEDIM)
+            </label>
+            <div class="layer-info">Groundwater rise in sedimentary domains</div>
+
+            <label>
+                <input type="checkbox" id="groundwaterSocle">
+                🪨 Groundwater Rise - Bedrock (REM_NAPPE_SOCLE)
+            </label>
+            <div class="layer-info">Groundwater rise in bedrock domains</div>
+        </div>
+
+        <!-- Ground Movement Risks -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #e74c3c;">🏔️ Ground Movements</h5>
+            <label>
+                <input type="checkbox" id="clayShrink">
+                🟫 Clay Shrink-Swell (ALEARG)
+            </label>
+            <div class="layer-info">Exposure to clay shrink-swell phenomenon</div>
+
+            <label>
+                <input type="checkbox" id="groundMovementLoc">
+                ⚠️ Ground Movements - Located (MVT_LOCALISE)
+            </label>
+            <div class="layer-info">Located ground movement events</div>
+
+            <label>
+                <input type="checkbox" id="groundMovementComm">
+                📍 Ground Movements - Commune (MVT_COMMUNE)
+            </label>
+            <div class="layer-info">Ground movements by commune</div>
+        </div>
+
+        <!-- Underground Risks -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #9b59b6;">🕳️ Underground Risks</h5>
+            <label>
+                <input type="checkbox" id="cavitiesLoc">
+                🕳️ Underground Cavities - Located (CAVITE_LOCALISEE)
+            </label>
+            <div class="layer-info">Located abandoned underground cavities</div>
+
+            <label>
+                <input type="checkbox" id="cavitiesComm">
+                📍 Underground Cavities - Commune (CAVITE_COMMUNE)
+            </label>
+            <div class="layer-info">Underground cavities by commune</div>
+        </div>
+
+        <!-- Seismic Risks -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #f39c12;">📊 Seismic Risks</h5>
+            <label>
+                <input type="checkbox" id="seismic">
+                📊 Seismic Intensity (SIS)
+            </label>
+            <div class="layer-info">Seismic intensity data</div>
+
+            <label>
+                <input type="checkbox" id="seismicIntensite">
+                📈 Seismic Intensity - Commune (SIS_INTENSITE)
+            </label>
+            <div class="layer-info">Interpolated seismic intensity by commune</div>
+        </div>
+
+        <!-- Recent Deformations -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #34495e;">🔬 Recent Deformations</h5>
+            <label>
+                <input type="checkbox" id="neoPalFaille">
+                🔬 Recent Faults (NEOPAL_FAILLE)
+            </label>
+            <div class="layer-info">Recent deformation faults</div>
+
+            <label>
+                <input type="checkbox" id="neoPalValide">
+                ✅ Validated Paleoseismic (NEOPAL_VALIDE)
+            </label>
+            <div class="layer-info">Validated paleoseismic indicators</div>
+
+            <label>
+                <input type="checkbox" id="neoPalNonValide">
+                ❌ Non-validated Paleoseismic (NEOPAL_NON_VALID)
+            </label>
+            <div class="layer-info">Non-validated paleoseismic indicators</div>
+        </div>
+
+        <!-- PPRN Flood Risk -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #16a085;">📋 PPRN Flood Risk</h5>
+            <label>
+                <input type="checkbox" id="pprnPerimetreInond">
+                📋 Flood PPRN Perimeters (PPRN_PERIMETRE_INOND)
+            </label>
+            <div class="layer-info">Official flood risk prevention plan perimeters</div>
+
+            <label>
+                <input type="checkbox" id="pprnZoneInond">
+                🗺️ Flood PPRN Zoning (PPRN_ZONE_INOND)
+            </label>
+            <div class="layer-info">Regulatory zoning for flood prevention plans</div>
+
+            <label>
+                <input type="checkbox" id="pprnCommuneInond">
+                🏘️ Flood PPRN Communes (PPRN_COMMUNE_RISQINOND)
+            </label>
+            <div class="layer-info">Communes subject to flood PPRN</div>
+
+            <label>
+                <input type="checkbox" id="pprnCommuneInondApprouv">
+                ✅ Approved Flood PPRN (PPRN_COMMUNE_INOND_APPROUV)
+            </label>
+            <div class="layer-info">Communes with approved flood PPRN</div>
+
+            <label>
+                <input type="checkbox" id="pprnCommuneInondPrescrit">
+                📝 Prescribed Flood PPRN (PPRN_COMMUNE_INOND_PRESCRIT)
+            </label>
+            <div class="layer-info">Communes with prescribed flood PPRN</div>
+        </div>
+
+        <!-- PPRN Seismic Risk -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #8e44ad;">📋 PPRN Seismic Risk</h5>
+            <label>
+                <input type="checkbox" id="pprnSeisme">
+                📋 Seismic PPRN (PPRN_SEISME)
+            </label>
+            <div class="layer-info">Seismic risk prevention plans</div>
+
+            <label>
+                <input type="checkbox" id="pprnPerimetreSeisme">
+                📐 Seismic PPRN Perimeters (PPRN_PERIMETRE_SEISME)
+            </label>
+            <div class="layer-info">Perimeters of seismic PPRN</div>
+        </div>
+
+        <!-- PPRN Avalanche Risk -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #2980b9;">🏔️ PPRN Avalanche Risk</h5>
+            <label>
+                <input type="checkbox" id="pprnZoneAvalanche">
+                🗺️ Avalanche PPRN Zoning (PPRN_ZONE_AVALANCHE)
+            </label>
+            <div class="layer-info">Regulatory zoning for avalanche prevention</div>
+
+            <label>
+                <input type="checkbox" id="pprnCommuneAvalanche">
+                🏘️ Avalanche PPRN Communes (PPRN_COMMUNE_AVALANCHE)
+            </label>
+            <div class="layer-info">Communes subject to avalanche PPRN</div>
+
+            <label>
+                <input type="checkbox" id="pprnCommuneAvalancheApprouv">
+                ✅ Approved Avalanche PPRN (PPRN_COMMUNE_AVALANCHE_APPROUV)
+            </label>
+            <div class="layer-info">Communes with approved avalanche PPRN</div>
+
+            <label>
+                <input type="checkbox" id="pprnCommuneAvalanchePrescrit">
+                📝 Prescribed Avalanche PPRN (PPRN_COMMUNE_AVALANCHE_PRESCRIT)
+            </label>
+            <div class="layer-info">Communes with prescribed avalanche PPRN</div>
+        </div>
+
+        <!-- PPRN Atmospheric Risk -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #27ae60;">🌪️ PPRN Atmospheric Risk</h5>
+            <label>
+                <input type="checkbox" id="pprnCommuneRisqatmo">
+                🌪️ Atmospheric PPRN Communes (PPRN_COMMUNE_RISQATMO)
+            </label>
+            <div class="layer-info">Communes subject to meteorological PPRN</div>
+
+            <label>
+                <input type="checkbox" id="pprnCommuneAtmosApprouv">
+                ✅ Approved Atmospheric PPRN (PPRN_COMMUNE_ATMOS_APPROUV)
+            </label>
+            <div class="layer-info">Communes with approved meteorological PPRN</div>
+
+            <label>
+                <input type="checkbox" id="pprnCommuneAtmosPrescrit">
+                📝 Prescribed Atmospheric PPRN (PPRN_COMMUNE_ATMOS_PRESCRIT)
+            </label>
+            <div class="layer-info">Communes with prescribed meteorological PPRN</div>
+        </div>
+
+        <!-- PPRN Ground Movement -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #d35400;">🏔️ PPRN Ground Movement</h5>
+            <label>
+                <input type="checkbox" id="pprnZoneMvt">
+                🗺️ Ground Movement PPRN Zoning (PPRN_ZONE_MVT)
+            </label>
+            <div class="layer-info">Regulatory zoning for ground movement PPRN</div>
+        </div>
+
+        <!-- Industrial Installations -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #7f8c8d;">🏭 Industrial Installations</h5>
+            <label>
+                <input type="checkbox" id="installationsClassees">
+                🏭 Classified Installations (INSTALLATIONS_CLASSEES_SIMPLIFIE)
+            </label>
+            <div class="layer-info">Classified industrial installations</div>
+        </div>
+
+        <!-- Topographic Data -->
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #34495e;">🗺️ Topographic Data</h5>
+            <label>
+                <input type="checkbox" id="topoI">
+                🗺️ IGN Topographic Base (TOPO_I)
+            </label>
+            <div class="layer-info">IGN BD Topo base layer</div>
+
+            <label>
+                <input type="checkbox" id="topoCamping">
+                🏕️ Camping Areas (TOPO_I_CULTURE_LOISIRS_CAMPING)
+            </label>
+            <div class="layer-info">Camping areas from IGN BD Topo</div>
+        </div>
+
+        <div class="opacity-control">
+            <label for="opacitySlider">Layer Opacity: <span id="opacityValue">70%</span></label>
+            <input type="range" id="opacitySlider" min="0" max="100" value="70">
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <p>Loading BRGM Georisques data...</p>
+    </div>
+
+    <div class="attribution">
+        © BRGM - French Geological Survey | Data: georisques.gouv.fr
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([48.8566, 2.3522], 12); // Paris area as default
+
+        // Add OpenStreetMap base layer
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        });
+
+        // Add satellite base layer option
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri',
+            maxZoom: 19
+        });
+
+        // Default base layer
+        osmLayer.addTo(map);
+
+        // BRGM WMS Services
+        const wmsBaseUrl = 'https://mapsref.brgm.fr/wxs/georisques/rapport_risques';
+        const geoservicesBaseUrl = 'http://geoservices.brgm.fr/risques';
+
+        // Layer configurations
+        const layerConfigs = {
+            // Water Risks
+            floodLayer: {
+                url: wmsBaseUrl,
+                layers: 'SUP_INOND',
+                name: 'Flood Risk (SUP_INOND)',
+                active: true
+            },
+            groundwaterSedim: {
+                url: geoservicesBaseUrl,
+                layers: 'REM_NAPPE_SEDIM',
+                name: 'Groundwater Rise - Sedimentary',
+                active: false
+            },
+            groundwaterSocle: {
+                url: geoservicesBaseUrl,
+                layers: 'REM_NAPPE_SOCLE',
+                name: 'Groundwater Rise - Bedrock',
+                active: false
+            },
+
+            // Ground Movements
+            clayShrink: {
+                url: geoservicesBaseUrl,
+                layers: 'ALEARG',
+                name: 'Clay Shrink-Swell',
+                active: false
+            },
+            groundMovementLoc: {
+                url: geoservicesBaseUrl,
+                layers: 'MVT_LOCALISE',
+                name: 'Ground Movements - Located',
+                active: false
+            },
+            groundMovementComm: {
+                url: geoservicesBaseUrl,
+                layers: 'MVT_COMMUNE',
+                name: 'Ground Movements - Commune',
+                active: false
+            },
+
+            // Underground Risks
+            cavitiesLoc: {
+                url: geoservicesBaseUrl,
+                layers: 'CAVITE_LOCALISEE',
+                name: 'Underground Cavities - Located',
+                active: false
+            },
+            cavitiesComm: {
+                url: geoservicesBaseUrl,
+                layers: 'CAVITE_COMMUNE',
+                name: 'Underground Cavities - Commune',
+                active: false
+            },
+
+            // Seismic Risks
+            seismic: {
+                url: geoservicesBaseUrl,
+                layers: 'SIS',
+                name: 'Seismic Intensity',
+                active: false
+            },
+            seismicIntensite: {
+                url: geoservicesBaseUrl,
+                layers: 'SIS_INTENSITE',
+                name: 'Seismic Intensity - Commune',
+                active: false
+            },
+
+            // Recent Deformations
+            neoPalFaille: {
+                url: geoservicesBaseUrl,
+                layers: 'NEOPAL_FAILLE',
+                name: 'Recent Faults',
+                active: false
+            },
+            neoPalValide: {
+                url: geoservicesBaseUrl,
+                layers: 'NEOPAL_VALIDE',
+                name: 'Validated Paleoseismic',
+                active: false
+            },
+            neoPalNonValide: {
+                url: geoservicesBaseUrl,
+                layers: 'NEOPAL_NON_VALID',
+                name: 'Non-validated Paleoseismic',
+                active: false
+            },
+
+            // PPRN Flood Risk
+            pprnPerimetreInond: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_PERIMETRE_INOND',
+                name: 'Flood PPRN Perimeters',
+                active: false
+            },
+            pprnZoneInond: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_ZONE_INOND',
+                name: 'Flood PPRN Zoning',
+                active: false
+            },
+            pprnCommuneInond: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_RISQINOND',
+                name: 'Flood PPRN Communes',
+                active: false
+            },
+            pprnCommuneInondApprouv: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_INOND_APPROUV',
+                name: 'Approved Flood PPRN',
+                active: false
+            },
+            pprnCommuneInondPrescrit: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_INOND_PRESCRIT',
+                name: 'Prescribed Flood PPRN',
+                active: false
+            },
+
+            // PPRN Seismic Risk
+            pprnSeisme: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_SEISME',
+                name: 'Seismic PPRN',
+                active: false
+            },
+            pprnPerimetreSeisme: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_PERIMETRE_SEISME',
+                name: 'Seismic PPRN Perimeters',
+                active: false
+            },
+
+            // PPRN Avalanche Risk
+            pprnZoneAvalanche: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_ZONE_AVALANCHE',
+                name: 'Avalanche PPRN Zoning',
+                active: false
+            },
+            pprnCommuneAvalanche: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_AVALANCHE',
+                name: 'Avalanche PPRN Communes',
+                active: false
+            },
+            pprnCommuneAvalancheApprouv: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_AVALANCHE_APPROUV',
+                name: 'Approved Avalanche PPRN',
+                active: false
+            },
+            pprnCommuneAvalanchePrescrit: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_AVALANCHE_PRESCRIT',
+                name: 'Prescribed Avalanche PPRN',
+                active: false
+            },
+
+            // PPRN Atmospheric Risk
+            pprnCommuneRisqatmo: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_RISQATMO',
+                name: 'Atmospheric PPRN Communes',
+                active: false
+            },
+            pprnCommuneAtmosApprouv: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_ATMOS_APPROUV',
+                name: 'Approved Atmospheric PPRN',
+                active: false
+            },
+            pprnCommuneAtmosPrescrit: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_COMMUNE_ATMOS_PRESCRIT',
+                name: 'Prescribed Atmospheric PPRN',
+                active: false
+            },
+
+            // PPRN Ground Movement
+            pprnZoneMvt: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'PPRN_ZONE_MVT',
+                name: 'Ground Movement PPRN Zoning',
+                active: false
+            },
+
+            // Industrial Installations
+            installationsClassees: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'INSTALLATIONS_CLASSEES_SIMPLIFIE',
+                name: 'Classified Installations',
+                active: false
+            },
+
+            // Topographic Data
+            topoI: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'TOPO_I',
+                name: 'IGN Topographic Base',
+                active: false
+            },
+            topoCamping: {
+                url: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: 'TOPO_I_CULTURE_LOISIRS_CAMPING',
+                name: 'Camping Areas',
+                active: false
+            }
+        };
+
+        // Create WMS layers
+        const wmsLayers = {};
+
+        Object.keys(layerConfigs).forEach(layerId => {
+            const config = layerConfigs[layerId];
+            wmsLayers[layerId] = L.tileLayer.wms(config.url, {
+                layers: config.layers,
+                format: 'image/png',
+                transparent: true,
+                version: '1.3.0',
+                crs: L.CRS.EPSG3857,
+                styles: '',
+                opacity: 0.7,
+                attribution: '© BRGM - French Geological Survey'
+            });
+
+            if (config.active) {
+                wmsLayers[layerId].addTo(map);
+            }
+        });
+
+        // Layer controls
+        const baseLayers = {
+            "OpenStreetMap": osmLayer,
+            "Satellite": satelliteLayer
+        };
+
+        const overlayLayers = {};
+        Object.keys(layerConfigs).forEach(layerId => {
+            overlayLayers[layerConfigs[layerId].name] = wmsLayers[layerId];
+        });
+
+        L.control.layers(baseLayers, overlayLayers, {
+            position: 'bottomleft'
+        }).addTo(map);
+
+        // Add geocoder for search functionality
+        L.Control.geocoder({
+            defaultMarkGeocode: false,
+            position: 'topleft',
+            placeholder: 'Search location...',
+            errorMessage: 'Location not found.',
+            showResultIcons: true,
+            suggestMinLength: 2,
+            suggestTimeout: 250,
+            queryMinLength: 1,
+            geocoder: L.Control.Geocoder.nominatim()
+        }).on('markgeocode', function (e) {
+            const bbox = e.geocode.bbox;
+            const poly = L.polygon([
+                bbox.getSouthEast(),
+                bbox.getNorthEast(),
+                bbox.getNorthWest(),
+                bbox.getSouthWest()
+            ]);
+            map.fitBounds(poly.getBounds());
+        }).addTo(map);
+
+        // Layer visibility controls
+        Object.keys(layerConfigs).forEach(layerId => {
+            const checkbox = document.getElementById(layerId);
+            if (checkbox) {
+                checkbox.addEventListener('change', function (e) {
+                    if (e.target.checked) {
+                        wmsLayers[layerId].addTo(map);
+                    } else {
+                        map.removeLayer(wmsLayers[layerId]);
+                    }
+                });
+            }
+        });
+
+        // Global opacity control
+        const opacitySlider = document.getElementById('opacitySlider');
+        const opacityValue = document.getElementById('opacityValue');
+
+        opacitySlider.addEventListener('input', function (e) {
+            const opacity = e.target.value / 100;
+            Object.values(wmsLayers).forEach(layer => {
+                layer.setOpacity(opacity);
+            });
+            opacityValue.textContent = e.target.value + '%';
+        });
+
+        // Add scale control
+        L.control.scale({
+            position: 'bottomright',
+            metric: true,
+            imperial: false
+        }).addTo(map);
+
+        // Coordinates display
+        map.on('mousemove', function (e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            document.getElementById('coordText').innerHTML =
+                `Lat: ${lat}<br>Lng: ${lng}`;
+        });
+
+        // Hide loading message after map loads
+        setTimeout(function () {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }, 2000);
+
+        // Add click event for debugging
+        map.on('click', function (e) {
+            console.log('Clicked at:', e.latlng);
+            console.log('Map bounds:', map.getBounds());
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            map.invalidateSize();
+        });
+    </script>
+</body>
+
+</html>

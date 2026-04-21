@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frontend</title>
+  <!-- MapLibre-GL CSS -->
+  <link rel="stylesheet" href="/node_modules/maplibre-gl/dist/maplibre-gl.css" />
+  <!-- Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://georisques.gouv.fr" />
+  <link rel="dns-prefetch" href="https://georisques.gouv.fr" />
+  <!-- Enedis API optimization -->
+  <link rel="preconnect" href="https://opendata.enedis.fr" />
+  <link rel="dns-prefetch" href="https://opendata.enedis.fr" />
+  <!-- WMS Services Preconnection -->
+  <link rel="preconnect" href="https://mapsref.brgm.fr" crossorigin />
+  <link rel="dns-prefetch" href="https://mapsref.brgm.fr" />
+  <link rel="preconnect" href="https://geobretagne.fr" crossorigin />
+  <link rel="dns-prefetch" href="https://geobretagne.fr" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

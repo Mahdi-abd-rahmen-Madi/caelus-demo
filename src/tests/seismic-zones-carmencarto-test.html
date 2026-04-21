@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarmenCarto Seismic Zoning WMS Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .layer-controls {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 280px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .layer-controls h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .layer-group {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .layer-group:last-child {
+            border-bottom: none;
+        }
+
+        .layer-controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .layer-controls input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .opacity-control {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .opacity-control label {
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .opacity-control input[type="range"] {
+            width: 100%;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .layer-info {
+            font-size: 11px;
+            color: #777;
+            margin-left: 20px;
+            margin-top: -5px;
+            margin-bottom: 8px;
+        }
+
+        .coordinates {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+        }
+
+        .attribution {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            z-index: 1000;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 200px;
+        }
+
+        .legend h5 {
+            margin: 0 0 10px 0;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+
+        .legend img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <div class="info-panel">
+        <h3>Seismic Zoning WMS Test</h3>
+        <p><strong>Service:</strong> CarmenCarto WMS</p>
+        <p><strong>Provider:</strong> French Geological Survey</p>
+        <p><strong>Format:</strong> WMS 1.1.1, PNG</p>
+        <p><strong>SRS:</strong> EPSG:3857 (Web Mercator)</p>
+        <p style="margin-top: 10px; font-size: 12px; color: #777;">
+            Testing the dedicated seismic zoning service from CarmenCarto.
+            Toggle different layer combinations to test functionality.
+        </p>
+        <div class="coordinates" id="coords">
+            <strong>Coordinates:</strong><br>
+            <span id="coordText">Move mouse over map</span>
+        </div>
+    </div>
+
+    <div class="layer-controls">
+        <h4>Layer Controls</h4>
+
+        <div class="layer-group">
+            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: #f39c12;">Seismic Zoning Layers</h5>
+            <label>
+                <input type="checkbox" id="zonesOnly">
+                Zones Only
+            </label>
+            <div class="layer-info">Zonage_sismique_Zones</div>
+
+            <label>
+                <input type="checkbox" id="communesOnly">
+                Communes Only
+            </label>
+            <div class="layer-info">Zonage_sismique_Communes</div>
+
+            <label>
+                <input type="checkbox" id="bothLayers" checked>
+                Both Layers (Recommended)
+            </label>
+            <div class="layer-info">Zones + Communes</div>
+        </div>
+
+        <div class="opacity-control">
+            <label for="opacitySlider">Layer Opacity: <span id="opacityValue">70%</span></label>
+            <input type="range" id="opacitySlider" min="0" max="100" value="70">
+        </div>
+    </div>
+
+    <div class="legend">
+        <h5>Legend</h5>
+        <img id="legendImage" src="https://ws.carmencarto.fr/WMS/168/zonage_sismique?&request=GetLegendGraphic&SERVICE=WMS&VERSION=1.1.1&FORMAT=image/png&LAYER=Zonage_sismique_Communes" alt="Seismic Zoning Legend" />
+    </div>
+
+    <div class="loading" id="loading">
+        <p>Loading seismic zoning data...</p>
+    </div>
+
+    <div class="attribution">
+        © CarmenCarto / French Geological Survey | Data: Zonage sismique
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+
+    <script>
+        // Initialize the map - centered on France
+        const map = L.map('map').setView([46.6031, 1.8883], 8); // Center of France
+
+        // Add OpenStreetMap base layer
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        });
+
+        // Add satellite base layer option
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri',
+            maxZoom: 19
+        });
+
+        // Default base layer
+        osmLayer.addTo(map);
+
+        // CarmenCarto WMS Configuration
+        const carmenCartoBaseUrl = 'https://ws.carmencarto.fr/WMS/168/zonage_sismique';
+
+        // Layer configurations
+        const layerConfigs = {
+            zonesOnly: {
+                layers: 'Zonage_sismique_Zones',
+                name: 'Seismic Zones Only',
+                active: false
+            },
+            communesOnly: {
+                layers: 'Zonage_sismique_Communes',
+                name: 'Seismic Communes Only',
+                active: false
+            },
+            bothLayers: {
+                layers: 'Zonage_sismique_Zones,Zonage_sismique_Communes',
+                name: 'Seismic Zones + Communes',
+                active: true
+            }
+        };
+
+        // Create WMS layers
+        const wmsLayers = {};
+
+        Object.keys(layerConfigs).forEach(layerId => {
+            const config = layerConfigs[layerId];
+            wmsLayers[layerId] = L.tileLayer.wms(carmenCartoBaseUrl, {
+                layers: config.layers,
+                format: 'image/png',
+                transparent: true,
+                version: '1.1.1',
+                srs: 'EPSG:3857',
+                styles: '',
+                opacity: 0.7,
+                attribution: '© CarmenCarto / French Geological Survey'
+            });
+
+            if (config.active) {
+                wmsLayers[layerId].addTo(map);
+            }
+        });
+
+        // Layer controls
+        const baseLayers = {
+            "OpenStreetMap": osmLayer,
+            "Satellite": satelliteLayer
+        };
+
+        const overlayLayers = {};
+        Object.keys(layerConfigs).forEach(layerId => {
+            overlayLayers[layerConfigs[layerId].name] = wmsLayers[layerId];
+        });
+
+        L.control.layers(baseLayers, overlayLayers, {
+            position: 'bottomleft'
+        }).addTo(map);
+
+        // Add geocoder for search functionality
+        L.Control.geocoder({
+            defaultMarkGeocode: false,
+            position: 'topleft',
+            placeholder: 'Search location...',
+            errorMessage: 'Location not found.',
+            showResultIcons: true,
+            suggestMinLength: 2,
+            suggestTimeout: 250,
+            queryMinLength: 1,
+            geocoder: L.Control.Geocoder.nominatim()
+        }).on('markgeocode', function (e) {
+            const bbox = e.geocode.bbox;
+            const poly = L.polygon([
+                bbox.getSouthEast(),
+                bbox.getNorthEast(),
+                bbox.getNorthWest(),
+                bbox.getSouthWest()
+            ]);
+            map.fitBounds(poly.getBounds());
+        }).addTo(map);
+
+        // Layer visibility controls (mutually exclusive)
+        const layerCheckboxes = ['zonesOnly', 'communesOnly', 'bothLayers'];
+        
+        layerCheckboxes.forEach(checkboxId => {
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.addEventListener('change', function (e) {
+                    if (e.target.checked) {
+                        // Uncheck other layers
+                        layerCheckboxes.forEach(otherId => {
+                            if (otherId !== checkboxId) {
+                                document.getElementById(otherId).checked = false;
+                                map.removeLayer(wmsLayers[otherId]);
+                            }
+                        });
+                        // Add this layer
+                        wmsLayers[checkboxId].addTo(map);
+                    } else {
+                        // Remove this layer
+                        map.removeLayer(wmsLayers[checkboxId]);
+                    }
+                });
+            }
+        });
+
+        // Global opacity control
+        const opacitySlider = document.getElementById('opacitySlider');
+        const opacityValue = document.getElementById('opacityValue');
+
+        opacitySlider.addEventListener('input', function (e) {
+            const opacity = e.target.value / 100;
+            Object.values(wmsLayers).forEach(layer => {
+                layer.setOpacity(opacity);
+            });
+            opacityValue.textContent = e.target.value + '%';
+        });
+
+        // Add scale control
+        L.control.scale({
+            position: 'bottomright',
+            metric: true,
+            imperial: false
+        }).addTo(map);
+
+        // Coordinates display
+        map.on('mousemove', function (e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            document.getElementById('coordText').innerHTML =
+                `Lat: ${lat}<br>Lng: ${lng}`;
+        });
+
+        // Hide loading message after map loads
+        setTimeout(function () {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }, 2000);
+
+        // Add click event for debugging
+        map.on('click', function (e) {
+            console.log('Clicked at:', e.latlng);
+            console.log('Map bounds:', map.getBounds());
+            console.log('Current zoom:', map.getZoom());
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            map.invalidateSize();
+        });
+
+        // Test WMS service availability
+        fetch('https://ws.carmencarto.fr/WMS/168/zonage_sismique?service=WMS&version=1.1.1&request=GetCapabilities')
+            .then(response => {
+                if (response.ok) {
+                    console.log('CarmenCarto WMS service is available');
+                } else {
+                    console.error('CarmenCarto WMS service error:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('CarmenCarto WMS service fetch error:', error);
+            });
+    </script>
+</body>
+</html>

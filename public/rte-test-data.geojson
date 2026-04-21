@@ -1,0 +1,440 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -1.5,
+            43.0
+          ],
+          [
+            2.0,
+            45.0
+          ],
+          [
+            4.0,
+            47.5
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "AVELIL72GAVRE",
+        "nom_ligne": "LIAISON 400kV N0 2 AVELIN - GAVRELLE",
+        "etat": "EN EXPLOITATION",
+        "tension": "400kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -1.4,
+            43.1
+          ],
+          [
+            2.1,
+            45.1
+          ],
+          [
+            4.1,
+            47.6
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "REALTL71TAVEL",
+        "nom_ligne": "LIAISON 400kV N0 1 REALTOR - TAVEL",
+        "etat": "EN EXPLOITATION",
+        "tension": "400kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -1.3,
+            43.2
+          ],
+          [
+            2.2,
+            45.2
+          ],
+          [
+            4.2,
+            47.7
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "REALTL71TAVEL",
+        "nom_ligne": "LIAISON 400kV N0 1 REALTOR - TAVEL",
+        "etat": "EN EXPLOITATION",
+        "tension": "400kV",
+        "source": "RTE",
+        "nombre_circuit": "2"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -2.0,
+            44.0
+          ],
+          [
+            1.5,
+            46.0
+          ],
+          [
+            3.5,
+            48.0
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "B.CARL62LINGO",
+        "nom_ligne": "LIAISON 225kV N0 2 BROC-CARROS (LE)-LINGOSTIERE",
+        "etat": "EN EXPLOITATION",
+        "tension": "225kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -1.9,
+            44.1
+          ],
+          [
+            1.6,
+            46.1
+          ],
+          [
+            3.6,
+            48.1
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "NOGENL61ORMES",
+        "nom_ligne": "LIAISON 225kV N0 1 NOGENTEL - ORMES",
+        "etat": "EN EXPLOITATION",
+        "tension": "225kV",
+        "source": "RTE",
+        "nombre_circuit": "2"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -1.8,
+            44.2
+          ],
+          [
+            1.7,
+            46.2
+          ],
+          [
+            3.7,
+            48.2
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "P.BORL61ZLAFI",
+        "nom_ligne": "LIAISON 225kV N0 1 BARJAC - PIED-DE-BORNE - LAFIGERE",
+        "etat": "EN EXPLOITATION",
+        "tension": "225kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -1.0,
+            43.5
+          ],
+          [
+            2.5,
+            45.5
+          ],
+          [
+            4.5,
+            48.5
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "BIRONL41SSEVR",
+        "nom_ligne": "LIAISON 90kV N0 1 BIRON-ST-EVROULT",
+        "etat": "EN EXPLOITATION",
+        "tension": "90kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -0.9,
+            43.6
+          ],
+          [
+            2.6,
+            45.6
+          ],
+          [
+            4.6,
+            48.6
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "AVOINL41CHIN5",
+        "nom_ligne": "LIAISON 90kV N0 1 AVOINE-CHINON",
+        "etat": "EN EXPLOITATION",
+        "tension": "90kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -0.8,
+            43.7
+          ],
+          [
+            2.7,
+            45.7
+          ],
+          [
+            4.7,
+            48.7
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "THIMEL41ZTHIM",
+        "nom_ligne": "LIAISON 90kV N0 1 ARPENTS (LES) - POIRIER - THIMERT",
+        "etat": "EN EXPLOITATION",
+        "tension": "90kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            0.0,
+            42.5
+          ],
+          [
+            3.0,
+            44.5
+          ],
+          [
+            5.0,
+            46.5
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "BAIXAL31TAUTA",
+        "nom_ligne": "LIAISON 63kV N0 1 BAIXAS - TAUTAVEL",
+        "etat": "EN EXPLOITATION",
+        "tension": "63kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            0.1,
+            42.6
+          ],
+          [
+            3.1,
+            44.6
+          ],
+          [
+            5.1,
+            46.6
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "LONGUL31MORU",
+        "nom_ligne": "LIAISON 63kV N0 1 LONGUEIL-MORU",
+        "etat": "EN EXPLOITATION",
+        "tension": "63kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            0.2,
+            42.7
+          ],
+          [
+            3.2,
+            44.7
+          ],
+          [
+            5.2,
+            46.7
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "SALLAL31ZFAYE",
+        "nom_ligne": "LIAISON 63kV N0 1 FAYET (LE)-PASSY-SALLANCHES",
+        "etat": "EN EXPLOITATION",
+        "tension": "63kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -2.5,
+            45.5
+          ],
+          [
+            0.5,
+            47.5
+          ],
+          [
+            2.5,
+            49.0
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "CALYPL21SAUS2",
+        "nom_ligne": "LIAISON 45kV N0 1 CALYPSO-SAUSSAZ II (LA)",
+        "etat": "EN EXPLOITATION",
+        "tension": "45kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -2.4,
+            45.6
+          ],
+          [
+            0.6,
+            47.6
+          ],
+          [
+            2.6,
+            49.1
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "G.COEL21N.BRI",
+        "nom_ligne": "LIAISON 45kV N0 1 GRAND-COEUR-NOTRE-DAME-DE-BRIANCON",
+        "etat": "EN EXPLOITATION",
+        "tension": "45kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -2.3,
+            45.7
+          ],
+          [
+            0.7,
+            47.7
+          ],
+          [
+            2.7,
+            49.2
+          ]
+        ]
+      },
+      "properties": {
+        "type_ouvrage": "AERIEN",
+        "code_ligne": "ARVANL21ZARVA",
+        "nom_ligne": "LIAISON 45kV N0 1 ARVAN - CORBIER (LE) - LONGEFAN",
+        "etat": "EN EXPLOITATION",
+        "tension": "45kV",
+        "source": "RTE",
+        "nombre_circuit": "1"
+      }
+    }
+  ]
+}

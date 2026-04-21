@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGN Vector Layers - Simple Test</title>
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .layer-btn {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px 12px;
+            background: #007cbf;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .layer-btn:hover {
+            background: #005a87;
+        }
+
+        .layer-btn.active {
+            background: #28a745;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="controls">
+        <h3>IGN Vector Layers Test</h3>
+        <button class="layer-btn" onclick="testPCI()">Test PCI Parcels</button>
+        <button class="layer-btn" onclick="testBDTOPO()">Test BDTOPO</button>
+        <button class="layer-btn" onclick="testADMIN()">Test ADMIN_EXPRESS</button>
+        <button class="layer-btn" onclick="testPLAN()">Test PLAN.IGN</button>
+        <button class="layer-btn" onclick="clearAll()">Clear All</button>
+    </div>
+
+    <script>
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {
+                    'basemap': {
+                        type: 'raster',
+                        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        tileSize: 256
+                    }
+                },
+                layers: [{
+                    id: 'basemap',
+                    type: 'raster',
+                    source: 'basemap',
+                    minzoom: 0,
+                    maxzoom: 19
+                }]
+            },
+            center: [2.3522, 48.8566],
+            zoom: 12
+        });
+
+        map.addControl(new maplibregl.NavigationControl());
+
+        let currentSource = null;
+        let currentLayers = [];
+
+        function clearAll() {
+            currentLayers.forEach(layerId => {
+                if (map.getLayer(layerId)) {
+                    map.removeLayer(layerId);
+                }
+            });
+            if (currentSource && map.getSource(currentSource)) {
+                map.removeSource(currentSource);
+            }
+            currentLayers = [];
+            currentSource = null;
+            console.log('Cleared all layers');
+        }
+
+        function testPCI() {
+            clearAll();
+            currentSource = 'pci-source';
+
+            map.addSource(currentSource, {
+                type: 'vector',
+                tiles: ['https://data.geopf.fr/tms/1.0.0/PCI/{z}/{x}/{y}.pbf'],
+                minzoom: 0,
+                maxzoom: 20
+            });
+
+            // Try different possible source-layer names
+            const possibleLayers = [
+                'parcelle', 'parcels', 'pci_parcelle', 'pci_parcelles',
+                'cadastral_parcels', 'parcelles', 'PARCELLE'
+            ];
+
+            possibleLayers.forEach((layerName, index) => {
+                const layerId = `pci-test-${index}`;
+                map.addLayer({
+                    id: layerId,
+                    type: 'line',
+                    source: currentSource,
+                    'source-layer': layerName,
+                    paint: {
+                        'line-color': `hsl(${index * 40}, 70%, 50%)`,
+                        'line-width': 1 + index * 0.2
+                    }
+                });
+                currentLayers.push(layerId);
+                console.log(`Added PCI test layer: ${layerName}`);
+            });
+        }
+
+        function testBDTOPO() {
+            clearAll();
+            currentSource = 'bdtopo-source';
+
+            map.addSource(currentSource, {
+                type: 'vector',
+                tiles: ['https://data.geopf.fr/tms/1.0.0/BDTOPO/{z}/{x}/{y}.pbf'],
+                minzoom: 0,
+                maxzoom: 20
+            });
+
+            // Try different possible source-layer names
+            const possibleLayers = [
+                'batiment', 'building', 'buildings', 'bati', 'BATIMENT',
+                'route', 'road', 'roads', 'ROUTE', 'reseau_routier',
+                'hydrographie', 'hydro', 'water', 'HYDROGRAPHIE'
+            ];
+
+            possibleLayers.forEach((layerName, index) => {
+                const layerId = `bdtopo-test-${index}`;
+                const layerType = layerName.includes('batiment') || layerName.includes('building') || layerName.includes('bati') ? 'fill' : 'line';
+
+                map.addLayer({
+                    id: layerId,
+                    type: layerType,
+                    source: currentSource,
+                    'source-layer': layerName,
+                    paint: layerType === 'fill' ? {
+                        'fill-color': `hsl(${index * 30}, 60%, 70%)`,
+                        'fill-opacity': 0.7
+                    } : {
+                        'line-color': `hsl(${index * 30}, 60%, 50%)`,
+                        'line-width': 1 + index * 0.1
+                    }
+                });
+                currentLayers.push(layerId);
+                console.log(`Added BDTOPO test layer: ${layerName} (${layerType})`);
+            });
+        }
+
+        function testADMIN() {
+            clearAll();
+            currentSource = 'admin-source';
+
+            map.addSource(currentSource, {
+                type: 'vector',
+                tiles: ['https://data.geopf.fr/tms/1.0.0/ADMIN_EXPRESS/{z}/{x}/{y}.pbf'],
+                minzoom: 0,
+                maxzoom: 20
+            });
+
+            // Try different possible source-layer names
+            const possibleLayers = [
+                'commune', 'communes', 'COMMUNE',
+                'departement', 'departements', 'DEPARTEMENT',
+                'region', 'regions', 'REGION',
+                'administrative', 'admin', 'boundary'
+            ];
+
+            possibleLayers.forEach((layerName, index) => {
+                const layerId = `admin-test-${index}`;
+                map.addLayer({
+                    id: layerId,
+                    type: 'line',
+                    source: currentSource,
+                    'source-layer': layerName,
+                    paint: {
+                        'line-color': `hsl(${index * 25}, 80%, 40%)`,
+                        'line-width': 1 + index * 0.3
+                    }
+                });
+                currentLayers.push(layerId);
+                console.log(`Added ADMIN test layer: ${layerName}`);
+            });
+        }
+
+        function testPLAN() {
+            clearAll();
+            currentSource = 'plan-source';
+
+            map.addSource(currentSource, {
+                type: 'vector',
+                tiles: ['https://data.geopf.fr/tms/1.0.0/PLAN.IGN/{z}/{x}/{y}.pbf'],
+                minzoom: 0,
+                maxzoom: 20
+            });
+
+            // Try different possible source-layer names for basemap
+            const possibleLayers = [
+                'background', 'base', 'plan', 'PLAN',
+                'road', 'roads', 'building', 'buildings',
+                'landuse', 'water', 'vegetation'
+            ];
+
+            possibleLayers.forEach((layerName, index) => {
+                const layerId = `plan-test-${index}`;
+                const layerType = layerName.includes('building') || layerName.includes('landuse') ? 'fill' : 'line';
+
+                map.addLayer({
+                    id: layerId,
+                    type: layerType,
+                    source: currentSource,
+                    'source-layer': layerName,
+                    paint: layerType === 'fill' ? {
+                        'fill-color': `hsl(${index * 20}, 50%, 80%)`,
+                        'fill-opacity': 0.8
+                    } : {
+                        'line-color': `hsl(${index * 20}, 50%, 60%)`,
+                        'line-width': 1
+                    }
+                });
+                currentLayers.push(layerId);
+                console.log(`Added PLAN test layer: ${layerName} (${layerType})`);
+            });
+        }
+
+        // Add click handler to see which layers actually have data and their properties
+        map.on('click', (e) => {
+            const features = map.queryRenderedFeatures(e.point);
+            console.log('Clicked features:', features.length);
+            features.forEach(feature => {
+                console.log(`Layer: ${feature.layer.id}, Source: ${feature.sourceLayer}, Type: ${feature.geometry.type}`);
+                console.log('Properties:', feature.properties);
+                console.log('Full feature:', feature);
+                console.log('---');
+            });
+        });
+
+        // Log when sources are loaded
+        map.on('sourcedata', (e) => {
+            if (e.sourceId && e.sourceId.includes('-source')) {
+                console.log(`Source data loaded: ${e.sourceId}`);
+            }
+        });
+    </script>
+</body>
+
+</html>

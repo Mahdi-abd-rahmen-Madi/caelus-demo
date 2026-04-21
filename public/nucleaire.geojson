@@ -1,0 +1,1397 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 1,
+        "Nom du réacteur": "BELLEVILLE-1",
+        "Centrale nucléaire": "Belleville",
+        "Commune": "Belleville",
+        "Commune Lat": 47.507221,
+        "Commune long": 2.84996,
+        "Département": "Cher",
+        "Rg": 54,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 363",
+        "Puissance nette (MWe)": "1 310",
+        "Début construction ": "1980",
+        "Raccordement au réseau": "1987",
+        "Mise en service": "1988"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.84996, 47.507221]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 2,
+        "Nom du réacteur": "BELLEVILLE-2",
+        "Centrale nucléaire": "Belleville",
+        "Commune": "Belleville",
+        "Commune Lat": 47.507221,
+        "Commune long": 2.84996,
+        "Département": "Cher",
+        "Rg": 55,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 363",
+        "Puissance nette (MWe)": "1 310",
+        "Début construction ": "1980",
+        "Raccordement au réseau": "1988",
+        "Mise en service": "1989"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.84996, 47.507221]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 3,
+        "Nom du réacteur": "BLAYAIS-15",
+        "Centrale nucléaire": "Blayais",
+        "Commune": "Braud-et-Saint-Louis",
+        "Commune Lat": 45.247987,
+        "Commune long": -0.626174,
+        "Département": "Gironde",
+        "Rg": 32,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1977",
+        "Raccordement au réseau": "1981",
+        "Mise en service": "1981"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.626174, 45.247987]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 4,
+        "Nom du réacteur": "BLAYAIS-25",
+        "Centrale nucléaire": "Blayais",
+        "Commune": "Braud-et-Saint-Louis",
+        "Commune Lat": 45.247987,
+        "Commune long": -0.626174,
+        "Département": "Gironde",
+        "Rg": 33,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1977",
+        "Raccordement au réseau": "1982",
+        "Mise en service": "1983"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.626174, 45.247987]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 5,
+        "Nom du réacteur": "BLAYAIS-3",
+        "Centrale nucléaire": "Blayais",
+        "Commune": "Braud-et-Saint-Louis",
+        "Commune Lat": 45.247987,
+        "Commune long": -0.626174,
+        "Département": "Gironde",
+        "Rg": 34,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1978",
+        "Raccordement au réseau": "1983",
+        "Mise en service": "1983"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.626174, 45.247987]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 6,
+        "Nom du réacteur": "BLAYAIS-4",
+        "Centrale nucléaire": "Blayais",
+        "Commune": "Braud-et-Saint-Louis",
+        "Commune Lat": 45.247987,
+        "Commune long": -0.626174,
+        "Département": "Gironde",
+        "Rg": 35,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1978",
+        "Raccordement au réseau": "1983",
+        "Mise en service": "1983"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.626174, 45.247987]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 7,
+        "Nom du réacteur": "BUGEY-2",
+        "Centrale nucléaire": "Bugey",
+        "Commune": "Saint-Vulbas",
+        "Commune Lat": 45.832913,
+        "Commune long": 5.290324,
+        "Département": "Ain",
+        "Rg": 13,
+        "Palier": "CP0",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "945",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1972",
+        "Raccordement au réseau": "1978",
+        "Mise en service": "1979"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.290324, 45.832913]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 8,
+        "Nom du réacteur": "BUGEY-3",
+        "Centrale nucléaire": "Bugey",
+        "Commune": "Saint-Vulbas",
+        "Commune Lat": 45.832913,
+        "Commune long": 5.290324,
+        "Département": "Ain",
+        "Rg": 14,
+        "Palier": "CP0",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "945",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1973",
+        "Raccordement au réseau": "1978",
+        "Mise en service": "1979"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.290324, 45.832913]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 9,
+        "Nom du réacteur": "BUGEY-4",
+        "Centrale nucléaire": "Bugey",
+        "Commune": "Saint-Vulbas",
+        "Commune Lat": 45.832913,
+        "Commune long": 5.290324,
+        "Département": "Ain",
+        "Rg": 15,
+        "Palier": "CP0",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "917",
+        "Puissance nette (MWe)": "880",
+        "Début construction ": "1974",
+        "Raccordement au réseau": "1979",
+        "Mise en service": "1979"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.290324, 45.832913]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 10,
+        "Nom du réacteur": "BUGEY-5",
+        "Centrale nucléaire": "Bugey",
+        "Commune": "Saint-Vulbas",
+        "Commune Lat": 45.832913,
+        "Commune long": 5.290324,
+        "Département": "Ain",
+        "Rg": 16,
+        "Palier": "CP0",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "917",
+        "Puissance nette (MWe)": "880",
+        "Début construction ": "1974",
+        "Raccordement au réseau": "1979",
+        "Mise en service": "1980"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.290324, 45.832913]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 11,
+        "Nom du réacteur": "CATTENOM-1",
+        "Centrale nucléaire": "Cattenom",
+        "Commune": "Cattenom",
+        "Commune Lat": 49.406263,
+        "Commune long": 6.243668,
+        "Département": "Moselle",
+        "Rg": 50,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 362",
+        "Puissance nette (MWe)": "1 300",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1986",
+        "Mise en service": "1987"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.243668, 49.406263]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 12,
+        "Nom du réacteur": "CATTENOM-2",
+        "Centrale nucléaire": "Cattenom",
+        "Commune": "Cattenom",
+        "Commune Lat": 49.406263,
+        "Commune long": 6.243668,
+        "Département": "Moselle",
+        "Rg": 53,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 362",
+        "Puissance nette (MWe)": "1 300",
+        "Début construction ": "1980",
+        "Raccordement au réseau": "1987",
+        "Mise en service": "1988"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.243668, 49.406263]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 13,
+        "Nom du réacteur": "CATTENOM-3",
+        "Centrale nucléaire": "Cattenom",
+        "Commune": "Cattenom",
+        "Commune Lat": 49.406263,
+        "Commune long": 6.243668,
+        "Département": "Moselle",
+        "Rg": 60,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 362",
+        "Puissance nette (MWe)": "1 300",
+        "Début construction ": "1982",
+        "Raccordement au réseau": "1990",
+        "Mise en service": "1991"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.243668, 49.406263]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 14,
+        "Nom du réacteur": "CATTENOM-4",
+        "Centrale nucléaire": "Cattenom",
+        "Commune": "Cattenom",
+        "Commune Lat": 49.406263,
+        "Commune long": 6.243668,
+        "Département": "Moselle",
+        "Rg": 65,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 362",
+        "Puissance nette (MWe)": "1 300",
+        "Début construction ": "1983",
+        "Raccordement au réseau": "1991",
+        "Mise en service": "1992"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.243668, 49.406263]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 15,
+        "Nom du réacteur": "CHINON-B-15",
+        "Centrale nucléaire": "Chinon-B",
+        "Commune": "Avoine",
+        "Commune Lat": 47.205697,
+        "Commune long": 0.181982,
+        "Département": "Indre-et-Loire",
+        "Rg": 40,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "954",
+        "Puissance nette (MWe)": "905",
+        "Début construction ": "1977",
+        "Raccordement au réseau": "1982",
+        "Mise en service": "1984"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.181982, 47.205697]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 16,
+        "Nom du réacteur": "CHINON-B-25",
+        "Centrale nucléaire": "Chinon-B",
+        "Commune": "Avoine",
+        "Commune Lat": 47.205697,
+        "Commune long": 0.181982,
+        "Département": "Indre-et-Loire",
+        "Rg": 41,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "954",
+        "Puissance nette (MWe)": "905",
+        "Début construction ": "1977",
+        "Raccordement au réseau": "1983",
+        "Mise en service": "1984"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.181982, 47.205697]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 17,
+        "Nom du réacteur": "CHINON-B-35",
+        "Centrale nucléaire": "Chinon-B",
+        "Commune": "Avoine",
+        "Commune Lat": 47.205697,
+        "Commune long": 0.181982,
+        "Département": "Indre-et-Loire",
+        "Rg": 56,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "954",
+        "Puissance nette (MWe)": "905",
+        "Début construction ": "1980",
+        "Raccordement au réseau": "1986",
+        "Mise en service": "1987"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.181982, 47.205697]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 18,
+        "Nom du réacteur": "CHINON-B-45",
+        "Centrale nucléaire": "Chinon-B",
+        "Commune": "Avoine",
+        "Commune Lat": 47.205697,
+        "Commune long": 0.181982,
+        "Département": "Indre-et-Loire",
+        "Rg": 57,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "954",
+        "Puissance nette (MWe)": "905",
+        "Début construction ": "1981",
+        "Raccordement au réseau": "1987",
+        "Mise en service": "1988"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.181982, 47.205697]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 19,
+        "Nom du réacteur": "CHOOZ-B-1",
+        "Centrale nucléaire": "Chooz-B",
+        "Commune": "Chooz",
+        "Commune Lat": 50.102368,
+        "Commune long": 4.807117,
+        "Département": "Ardennes",
+        "Rg": 62,
+        "Palier": "N4",
+        "Puissance thermique (MWt)": "0270-04-03",
+        "Puissance brute (MWe)": "1 560",
+        "Puissance nette (MWe)": "1 500",
+        "Début construction ": "1984",
+        "Raccordement au réseau": "1996",
+        "Mise en service": "2000"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.807117, 50.102368]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 20,
+        "Nom du réacteur": "CHOOZ-B-2",
+        "Centrale nucléaire": "Chooz-B",
+        "Commune": "Chooz",
+        "Commune Lat": 50.102368,
+        "Commune long": 4.807117,
+        "Département": "Ardennes",
+        "Rg": 70,
+        "Palier": "N4",
+        "Puissance thermique (MWt)": "0270-04-03",
+        "Puissance brute (MWe)": "1 560",
+        "Puissance nette (MWe)": "1 500",
+        "Début construction ": "1985",
+        "Raccordement au réseau": "1997",
+        "Mise en service": "2000"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.807117, 50.102368]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 21,
+        "Nom du réacteur": "CIVAUX-1",
+        "Centrale nucléaire": "Civaux",
+        "Commune": "Civaux",
+        "Commune Lat": 46.444209,
+        "Commune long": 0.664866,
+        "Département": "Vienne",
+        "Rg": 72,
+        "Palier": "N4",
+        "Puissance thermique (MWt)": "0270-04-03",
+        "Puissance brute (MWe)": "1 561",
+        "Puissance nette (MWe)": "1 495",
+        "Début construction ": "1988",
+        "Raccordement au réseau": "1997",
+        "Mise en service": "2002"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.664866, 46.444209]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 22,
+        "Nom du réacteur": "CIVAUX-2",
+        "Centrale nucléaire": "Civaux",
+        "Commune": "Civaux",
+        "Commune Lat": 46.444209,
+        "Commune long": 0.664866,
+        "Département": "Vienne",
+        "Rg": 73,
+        "Palier": "N4",
+        "Puissance thermique (MWt)": "0270-04-03",
+        "Puissance brute (MWe)": "1 561",
+        "Puissance nette (MWe)": "1 495",
+        "Début construction ": "1991",
+        "Raccordement au réseau": "1999",
+        "Mise en service": "2002"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.664866, 46.444209]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 23,
+        "Nom du réacteur": "CRUAS-1",
+        "Centrale nucléaire": "Cruas",
+        "Commune": "Cruas",
+        "Commune Lat": 44.656914,
+        "Commune long": 4.765255,
+        "Département": "Ardèche",
+        "Rg": 42,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "956",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1978",
+        "Raccordement au réseau": "1983",
+        "Mise en service": "1984"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.765255, 44.656914]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 24,
+        "Nom du réacteur": "CRUAS-2",
+        "Centrale nucléaire": "Cruas",
+        "Commune": "Cruas",
+        "Commune Lat": 44.656914,
+        "Commune long": 4.765255,
+        "Département": "Ardèche",
+        "Rg": 43,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "956",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1978",
+        "Raccordement au réseau": "1984",
+        "Mise en service": "1985"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.765255, 44.656914]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 25,
+        "Nom du réacteur": "CRUAS-3",
+        "Centrale nucléaire": "Cruas",
+        "Commune": "Cruas",
+        "Commune Lat": 44.656914,
+        "Commune long": 4.765255,
+        "Département": "Ardèche",
+        "Rg": 44,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "956",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1984",
+        "Mise en service": "1984"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.765255, 44.656914]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 26,
+        "Nom du réacteur": "CRUAS-4",
+        "Centrale nucléaire": "Cruas",
+        "Commune": "Cruas",
+        "Commune Lat": 44.656914,
+        "Commune long": 4.765255,
+        "Département": "Ardèche",
+        "Rg": 45,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "956",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1984",
+        "Mise en service": "1985"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.765255, 44.656914]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 27,
+        "Nom du réacteur": "DAMPIERRE-15",
+        "Centrale nucléaire": "Dampierre",
+        "Commune": "Dampierre",
+        "Commune Lat": 47.761336,
+        "Commune long": 2.519807,
+        "Département": "Loiret",
+        "Rg": 22,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "937",
+        "Puissance nette (MWe)": "890",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1980",
+        "Mise en service": "1980"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.519807, 47.761336]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 28,
+        "Nom du réacteur": "DAMPIERRE-25",
+        "Centrale nucléaire": "Dampierre",
+        "Commune": "Dampierre",
+        "Commune Lat": 47.761336,
+        "Commune long": 2.519807,
+        "Département": "Loiret",
+        "Rg": 29,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "937",
+        "Puissance nette (MWe)": "890",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1980",
+        "Mise en service": "1981"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.519807, 47.761336]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 29,
+        "Nom du réacteur": "DAMPIERRE-35",
+        "Centrale nucléaire": "Dampierre",
+        "Commune": "Dampierre",
+        "Commune Lat": 47.761336,
+        "Commune long": 2.519807,
+        "Département": "Loiret",
+        "Rg": 30,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "937",
+        "Puissance nette (MWe)": "890",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1981",
+        "Mise en service": "1981"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.519807, 47.761336]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 30,
+        "Nom du réacteur": "DAMPIERRE-45",
+        "Centrale nucléaire": "Dampierre",
+        "Commune": "Dampierre",
+        "Commune Lat": 47.761336,
+        "Commune long": 2.519807,
+        "Département": "Loiret",
+        "Rg": 31,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "937",
+        "Puissance nette (MWe)": "890",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1981",
+        "Mise en service": "1981"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.519807, 47.761336]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 31,
+        "Nom du réacteur": "FESSENHEIM-1",
+        "Centrale nucléaire": "Fessenheim",
+        "Commune": "Fessenheim",
+        "Commune Lat": 47.914709,
+        "Commune long": 7.537626,
+        "Département": "Haut-Rhin",
+        "Rg": 11,
+        "Palier": "CP0",
+        "Puissance thermique (MWt)": "0660-02-03",
+        "Puissance brute (MWe)": "920",
+        "Puissance nette (MWe)": "880",
+        "Début construction ": "1971",
+        "Raccordement au réseau": "1977",
+        "Mise en service": "1978"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.537626, 47.914709]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 32,
+        "Nom du réacteur": "FESSENHEIM-2",
+        "Centrale nucléaire": "Fessenheim",
+        "Commune": "Fessenheim",
+        "Commune Lat": 47.914709,
+        "Commune long": 7.537626,
+        "Département": "Haut-Rhin",
+        "Rg": 12,
+        "Palier": "CP0",
+        "Puissance thermique (MWt)": "0660-02-03",
+        "Puissance brute (MWe)": "920",
+        "Puissance nette (MWe)": "880",
+        "Début construction ": "1972",
+        "Raccordement au réseau": "1977",
+        "Mise en service": "1978"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.537626, 47.914709]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 33,
+        "Nom du réacteur": "FLAMANVILLE-1",
+        "Centrale nucléaire": "Flamanville",
+        "Commune": "Flamanville",
+        "Commune Lat": 49.53207,
+        "Commune long": -1.865804,
+        "Département": "Manche",
+        "Rg": 46,
+        "Palier": "P4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 382",
+        "Puissance nette (MWe)": "1 330",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1985",
+        "Mise en service": "1986"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.865804, 49.53207]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 34,
+        "Nom du réacteur": "FLAMANVILLE-2",
+        "Centrale nucléaire": "Flamanville",
+        "Commune": "Flamanville",
+        "Commune Lat": 49.53207,
+        "Commune long": -1.865804,
+        "Département": "Manche",
+        "Rg": 47,
+        "Palier": "P4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 382",
+        "Puissance nette (MWe)": "1 330",
+        "Début construction ": "1980",
+        "Raccordement au réseau": "1986",
+        "Mise en service": "1987"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.865804, 49.53207]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 35,
+        "Nom du réacteur": "GOLFECH-1",
+        "Centrale nucléaire": "Golfech",
+        "Commune": "Golfech",
+        "Commune Lat": 44.114113,
+        "Commune long": 0.851985,
+        "Département": "Tarn-et-Garonne",
+        "Rg": 61,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 363",
+        "Puissance nette (MWe)": "1 310",
+        "Début construction ": "1982",
+        "Raccordement au réseau": "1990",
+        "Mise en service": "1991"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.851985, 44.114113]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 36,
+        "Nom du réacteur": "GOLFECH-2",
+        "Centrale nucléaire": "Golfech",
+        "Commune": "Golfech",
+        "Commune Lat": 44.114113,
+        "Commune long": 0.851985,
+        "Département": "Tarn-et-Garonne",
+        "Rg": 68,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 363",
+        "Puissance nette (MWe)": "1 310",
+        "Début construction ": "1984",
+        "Raccordement au réseau": "1993",
+        "Mise en service": "1994"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.851985, 44.114113]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 37,
+        "Nom du réacteur": "GRAVELINES-15",
+        "Centrale nucléaire": "Gravelines",
+        "Commune": "Gravelines",
+        "Commune Lat": 50.98707,
+        "Commune long": 2.125537,
+        "Département": "Nord",
+        "Rg": 20,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1980",
+        "Mise en service": "1980"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.125537, 50.98707]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 38,
+        "Nom du réacteur": "GRAVELINES-25",
+        "Centrale nucléaire": "Gravelines",
+        "Commune": "Gravelines",
+        "Commune Lat": 50.98707,
+        "Commune long": 2.125537,
+        "Département": "Nord",
+        "Rg": 21,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1980",
+        "Mise en service": "1980"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.125537, 50.98707]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 39,
+        "Nom du réacteur": "GRAVELINES-35",
+        "Centrale nucléaire": "Gravelines",
+        "Commune": "Gravelines",
+        "Commune Lat": 50.98707,
+        "Commune long": 2.125537,
+        "Département": "Nord",
+        "Rg": 27,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1980",
+        "Mise en service": "1981"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.125537, 50.98707]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 40,
+        "Nom du réacteur": "GRAVELINES-45",
+        "Centrale nucléaire": "Gravelines",
+        "Commune": "Gravelines",
+        "Commune Lat": 50.98707,
+        "Commune long": 2.125537,
+        "Département": "Nord",
+        "Rg": 28,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1976",
+        "Raccordement au réseau": "1981",
+        "Mise en service": "1981"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.125537, 50.98707]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 41,
+        "Nom du réacteur": "GRAVELINES-5",
+        "Centrale nucléaire": "Gravelines",
+        "Commune": "Gravelines",
+        "Commune Lat": 50.98707,
+        "Commune long": 2.125537,
+        "Département": "Nord",
+        "Rg": 51,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1984",
+        "Mise en service": "1985"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.125537, 50.98707]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 42,
+        "Nom du réacteur": "GRAVELINES-6",
+        "Centrale nucléaire": "Gravelines",
+        "Commune": "Gravelines",
+        "Commune Lat": 50.98707,
+        "Commune long": 2.125537,
+        "Département": "Nord",
+        "Rg": 52,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "951",
+        "Puissance nette (MWe)": "910",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1985",
+        "Mise en service": "1985"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.125537, 50.98707]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 43,
+        "Nom du réacteur": "NOGENT-1",
+        "Centrale nucléaire": "Nogent",
+        "Commune": "Nogent",
+        "Commune Lat": 48.492624,
+        "Commune long": 3.498165,
+        "Département": "Aube",
+        "Rg": 58,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 363",
+        "Puissance nette (MWe)": "1 310",
+        "Début construction ": "1981",
+        "Raccordement au réseau": "1987",
+        "Mise en service": "1988"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [3.498165, 48.492624]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 44,
+        "Nom du réacteur": "NOGENT-2",
+        "Centrale nucléaire": "Nogent",
+        "Commune": "Nogent",
+        "Commune Lat": 48.492624,
+        "Commune long": 3.498165,
+        "Département": "Aube",
+        "Rg": 59,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 363",
+        "Puissance nette (MWe)": "1 310",
+        "Début construction ": "1982",
+        "Raccordement au réseau": "1988",
+        "Mise en service": "1989"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [3.498165, 48.492624]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 45,
+        "Nom du réacteur": "PALUEL-1",
+        "Centrale nucléaire": "Paluel",
+        "Commune": "Paluel",
+        "Commune Lat": 49.832363,
+        "Commune long": 0.629065,
+        "Département": "Seine-Maritime",
+        "Rg": 36,
+        "Palier": "P4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 382",
+        "Puissance nette (MWe)": "1 330",
+        "Début construction ": "1977",
+        "Raccordement au réseau": "1984",
+        "Mise en service": "1985"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.629065, 49.832363]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 46,
+        "Nom du réacteur": "PALUEL-2",
+        "Centrale nucléaire": "Paluel",
+        "Commune": "Paluel",
+        "Commune Lat": 49.832363,
+        "Commune long": 0.629065,
+        "Département": "Seine-Maritime",
+        "Rg": 37,
+        "Palier": "P4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 382",
+        "Puissance nette (MWe)": "1 330",
+        "Début construction ": "1978",
+        "Raccordement au réseau": "1984",
+        "Mise en service": "1985"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.629065, 49.832363]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 47,
+        "Nom du réacteur": "PALUEL-3",
+        "Centrale nucléaire": "Paluel",
+        "Commune": "Paluel",
+        "Commune Lat": 49.832363,
+        "Commune long": 0.629065,
+        "Département": "Seine-Maritime",
+        "Rg": 38,
+        "Palier": "P4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 382",
+        "Puissance nette (MWe)": "1 330",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1985",
+        "Mise en service": "1986"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.629065, 49.832363]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 48,
+        "Nom du réacteur": "PALUEL-4",
+        "Centrale nucléaire": "Paluel",
+        "Commune": "Paluel",
+        "Commune Lat": 49.832363,
+        "Commune long": 0.629065,
+        "Département": "Seine-Maritime",
+        "Rg": 39,
+        "Palier": "P4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 382",
+        "Puissance nette (MWe)": "1 330",
+        "Début construction ": "1980",
+        "Raccordement au réseau": "1986",
+        "Mise en service": "1986"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.629065, 49.832363]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 49,
+        "Nom du réacteur": "PENLY-1",
+        "Centrale nucléaire": "Penly",
+        "Commune": "Saint-Martin-en-Campagne et Penly",
+        "Commune Lat": 49.957475,
+        "Commune long": 1.222451,
+        "Département": "Seine-Maritime",
+        "Rg": 63,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 382",
+        "Puissance nette (MWe)": "1 330",
+        "Début construction ": "1982",
+        "Raccordement au réseau": "1990",
+        "Mise en service": "1990"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1.222451, 49.957475]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 50,
+        "Nom du réacteur": "PENLY-2",
+        "Centrale nucléaire": "Penly",
+        "Commune": "Saint-Martin-en-Campagne et Penly",
+        "Commune Lat": 49.957475,
+        "Commune long": 1.222451,
+        "Département": "Seine-Maritime",
+        "Rg": 64,
+        "Palier": "P'4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 382",
+        "Puissance nette (MWe)": "1 330",
+        "Début construction ": "1984",
+        "Raccordement au réseau": "1992",
+        "Mise en service": "1992"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1.222451, 49.957475]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 51,
+        "Nom du réacteur": "ST. ALBAN-1",
+        "Centrale nucléaire": "Saint-Alban",
+        "Commune": "Saint-Alban",
+        "Commune Lat": 45.270039,
+        "Commune long": 5.332525,
+        "Département": "Isère",
+        "Rg": 48,
+        "Palier": "P4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 381",
+        "Puissance nette (MWe)": "1 335",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1985",
+        "Mise en service": "1986"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.332525, 45.270039]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 52,
+        "Nom du réacteur": "ST. ALBAN-2",
+        "Centrale nucléaire": "Saint-Alban",
+        "Commune": "Saint-Alban",
+        "Commune Lat": 45.270039,
+        "Commune long": 5.332525,
+        "Département": "Isère",
+        "Rg": 49,
+        "Palier": "P4",
+        "Puissance thermique (MWt)": "0817-03-03",
+        "Puissance brute (MWe)": "1 381",
+        "Puissance nette (MWe)": "1 335",
+        "Début construction ": "1979",
+        "Raccordement au réseau": "1986",
+        "Mise en service": "1987"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.332525, 45.270039]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 53,
+        "Nom du réacteur": "ST. LAURENT-B-15",
+        "Centrale nucléaire": "St. Laurent",
+        "Commune": "Saint-Laurent",
+        "Commune Lat": 47.748227,
+        "Commune long": 0.867467,
+        "Département": "Loir-et-cher",
+        "Rg": 17,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "956",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1976",
+        "Raccordement au réseau": "1981",
+        "Mise en service": "1983"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.867467, 47.748227]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 54,
+        "Nom du réacteur": "ST. LAURENT-B-25",
+        "Centrale nucléaire": "St. Laurent",
+        "Commune": "Saint-Laurent",
+        "Commune Lat": 47.748227,
+        "Commune long": 0.867467,
+        "Département": "Loir-et-cher",
+        "Rg": 23,
+        "Palier": "CP2",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "956",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1976",
+        "Raccordement au réseau": "1981",
+        "Mise en service": "1983"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.867467, 47.748227]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 55,
+        "Nom du réacteur": "TRICASTIN-15",
+        "Centrale nucléaire": "Tricastin",
+        "Commune": "Pierrelatte",
+        "Commune Lat": 44.37775,
+        "Commune long": 4.696981,
+        "Département": "Drôme",
+        "Rg": 18,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "955",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1974",
+        "Raccordement au réseau": "1980",
+        "Mise en service": "1980"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.696981, 44.37775]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 56,
+        "Nom du réacteur": "TRICASTIN-25",
+        "Centrale nucléaire": "Tricastin",
+        "Commune": "Pierrelatte",
+        "Commune Lat": 44.37775,
+        "Commune long": 4.696981,
+        "Département": "Drôme",
+        "Rg": 19,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "955",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1974",
+        "Raccordement au réseau": "1980",
+        "Mise en service": "1980"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.696981, 44.37775]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 57,
+        "Nom du réacteur": "TRICASTIN-35",
+        "Centrale nucléaire": "Tricastin",
+        "Commune": "Pierrelatte",
+        "Commune Lat": 44.37775,
+        "Commune long": 4.696981,
+        "Département": "Drôme",
+        "Rg": 25,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "955",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1981",
+        "Mise en service": "1981"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.696981, 44.37775]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "__id": 58,
+        "Nom du réacteur": "TRICASTIN-45",
+        "Centrale nucléaire": "Tricastin",
+        "Commune": "Pierrelatte",
+        "Commune Lat": 44.37775,
+        "Commune long": 4.696981,
+        "Département": "Drôme",
+        "Rg": 26,
+        "Palier": "CP1",
+        "Puissance thermique (MWt)": "0785-02-03",
+        "Puissance brute (MWe)": "955",
+        "Puissance nette (MWe)": "915",
+        "Début construction ": "1975",
+        "Raccordement au réseau": "1981",
+        "Mise en service": "1981"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [4.696981, 44.37775]
+      }
+    }
+  ]
+}

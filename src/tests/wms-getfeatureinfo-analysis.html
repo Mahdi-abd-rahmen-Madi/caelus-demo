@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS GetFeatureInfo Analysis</title>
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        #map {
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .feature-details {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+        }
+
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px;
+            font-size: 11px;
+        }
+
+        .attribute-name {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .attribute-value {
+            color: #212529;
+            word-break: break-word;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 WMS GetFeatureInfo Analysis</h1>
+            <p>Testing GetFeatureInfo capabilities of current WMS services</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🗺️ Interactive WMS Layer Testing</h2>
+            <div class="test-result info">
+                <strong>Instructions:</strong> Key WMS layers load automatically for testing. Toggle additional layers
+                on/off, then click on the map to test GetFeatureInfo responses in real-time
+            </div>
+
+            <!-- Layer Controls -->
+            <div id="layer-controls" style="margin: 20px 0;">
+                <h4>🔧 WMS Layer Controls</h4>
+                <div id="layer-toggles"></div>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="autoLoadLayers()">Reload Key Layers</button>
+                    <button class="btn btn-secondary" onclick="clearAllLayers()">Clear All Layers</button>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div id="map"></div>
+
+            <!-- Real-time Results -->
+            <div id="realtime-results" style="margin-top: 20px;">
+                <h4>📊 Click Results</h4>
+                <div id="click-results" class="test-result info">
+                    Layers are loading... Click on WMS layers to see GetFeatureInfo results...
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Detailed Analysis</h2>
+            <div id="detailed-results">
+                <div class="test-result info">Test results will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let testResults = {};
+        let activeLayers = new Set();
+        let wmsLayerSources = {};
+
+        // WMS configurations for testing with specific test locations
+        const wmsServices = {
+            canalisations: {
+                name: 'Canalisations BRGM',
+                baseUrl: 'https://mapsref.brgm.fr/wxs/georisques/risques',
+                layers: ['CANALISATIONS', 'C_HYDROCARBURES', 'C_PRODUITS_CHIM', 'C_GAZ'],
+                version: '1.3.0',
+                crs: 'EPSG:3857',
+                testLocations: [
+                    { lng: 2.3522, lat: 48.8566, name: 'Paris Region' }, // Paris - likely to have pipelines
+                    { lng: -1.9046, lat: 47.8426, name: 'Nantes Region' }, // Nantes - industrial area
+                    { lng: 5.3811, lat: 43.2965, name: 'Marseille Region' } // Marseille - port/industrial
+                ],
+                expectedAttributes: [
+                    'nature', 'diametre', 'materiau', 'etat', 'gestionnaire',
+                    'date_pose', 'profondeur', 'precision', 'technique'
+                ]
+            },
+            enedis: {
+                name: 'Enedis V2 GeoBretagne',
+                baseUrl: 'https://geobretagne.fr/geoserver/enedis/wms',
+                layers: ['poste_electrique', 'poste_source', 'poteau_electrique', 'reseau_hta', 'reseau_bt'],
+                version: '1.3.0',
+                crs: 'EPSG:3857',
+                testLocations: [
+                    { lng: -2.7538, lat: 47.6486, name: 'Brittany Region' }, // Brittany - good coverage
+                    { lng: 2.2137, lat: 46.6034, name: 'Central France' }, // Central France
+                    { lng: -1.6792, lat: 48.1129, name: 'Rennes Region' } // Rennes - urban area
+                ],
+                expectedAttributes: {
+                    poste_electrique: ['nom', 'type_poste', 'puissance', 'tension', 'commune', 'departement'],
+                    poste_source: ['nom', 'type_source', 'puissance', 'tension', 'commune'],
+                    poteau_electrique: ['id_poteau', 'type_poteau', 'materiau', 'hauteur', 'commune'],
+                    reseau_hta: ['tension', 'type_ligne', 'aerien_souterrain', 'longueur', 'commune'],
+                    reseau_bt: ['tension', 'type_ligne', 'aerien_souterrain', 'longueur', 'commune']
+                }
+            },
+            sample: {
+                name: 'Sample GeoServer',
+                baseUrl: 'https://demo.geo-solutions.it/geoserver/wms',
+                layers: ['topp:states'],
+                version: '1.1.1',
+                crs: 'EPSG:4326',
+                testLocations: [
+                    { lng: -100, lat: 40, name: 'Central USA' }
+                ],
+                expectedAttributes: ['STATE_NAME', 'STATE_FIPS', 'SUB_REGION', 'STATE_ABBR', 'POP2000']
+            }
+        };
+
+        function initMap() {
+            map = new maplibregl.Map({
+                container: 'map',
+                style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+                center: [2.213749, 46.603354],
+                zoom: 6
+            });
+
+            map.addControl(new maplibregl.NavigationControl());
+
+            map.on('load', () => {
+                console.log('Map loaded for testing');
+                createLayerControls();
+                setupClickHandlers();
+            });
+        }
+
+        function createLayerControls() {
+            const controlsDiv = document.getElementById('layer-toggles');
+            controlsDiv.innerHTML = '';
+
+            for (const [serviceKey, service] of Object.entries(wmsServices)) {
+                // Create service section
+                const serviceDiv = document.createElement('div');
+                serviceDiv.style.marginBottom = '15px';
+                serviceDiv.innerHTML = `
+                    <h5 style="margin: 0 0 10px 0; color: #333;">${service.name}</h5>
+                `;
+
+                // Create layer toggles
+                for (const layerName of service.layers) {
+                    const layerDiv = document.createElement('div');
+                    layerDiv.style.cssText = 'display: flex; align-items: center; justify-content: space-between; margin: 5px 0; padding: 8px; background: #f8f9fa; border-radius: 4px;';
+
+                    const layerId = `${serviceKey}-${layerName}`;
+                    const displayName = layerName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                    layerDiv.innerHTML = `
+                        <span style="font-size: 13px;">${displayName}</span>
+                        <div class="toggle-switch" id="${layerId}-toggle" onclick="toggleWMSLayer('${serviceKey}', '${layerName}')"></div>
+                    `;
+
+                    serviceDiv.appendChild(layerDiv);
+                }
+
+                controlsDiv.appendChild(serviceDiv);
+            }
+
+            // Auto-load all layers after creating controls
+            setTimeout(() => {
+                autoLoadLayers();
+            }, 1000);
+        }
+
+        function autoLoadLayers() {
+            logClick('Auto-loading WMS layers for testing...', 'info');
+
+            // Load key layers automatically
+            const keyLayers = [
+                { serviceKey: 'canalisations', layerName: 'CANALISATIONS' },
+                { serviceKey: 'canalisations', layerName: 'C_GAZ' },
+                { serviceKey: 'enedis', layerName: 'poste_electrique' },
+                { serviceKey: 'enedis', layerName: 'reseau_hta' }
+            ];
+
+            keyLayers.forEach(({ serviceKey, layerName }, index) => {
+                setTimeout(() => {
+                    toggleWMSLayer(serviceKey, layerName);
+                }, index * 500); // Stagger loading to avoid overwhelming the server
+            });
+        }
+
+        function clearAllLayers() {
+            // Clear all active layers
+            Object.keys(wmsLayerSources).forEach(layerId => {
+                const layerInfo = wmsLayerSources[layerId];
+                if (layerInfo) {
+                    const toggle = document.getElementById(`${layerId}-toggle`);
+                    if (toggle && toggle.classList.contains('active')) {
+                        toggleWMSLayer(layerInfo.serviceKey, layerInfo.layerName);
+                    }
+                }
+            });
+            logClick('All WMS layers cleared', 'info');
+        }
+
+        function toggleWMSLayer(serviceKey, layerName) {
+            const layerId = `${serviceKey}-${layerName}`;
+            const toggle = document.getElementById(`${layerId}-toggle`);
+            const service = wmsServices[serviceKey];
+            const sourceId = `${layerId}-source`;
+            const mapLayerId = `${layerId}-layer`;
+
+            if (toggle.classList.contains('active')) {
+                // Remove layer
+                if (map.getLayer(mapLayerId)) {
+                    map.removeLayer(mapLayerId);
+                }
+                if (map.getSource(sourceId)) {
+                    map.removeSource(sourceId);
+                }
+                delete wmsLayerSources[layerId];
+                toggle.classList.remove('active');
+                logClick(`Removed ${service.name} - ${layerName}`, 'info');
+            } else {
+                // Add layer
+                try {
+                    map.addSource(sourceId, {
+                        type: 'raster',
+                        tiles: [
+                            `${service.baseUrl}?` +
+                            `SERVICE=WMS&` +
+                            `VERSION=${service.version}&` +
+                            `REQUEST=GetMap&` +
+                            `LAYERS=${layerName}&` +
+                            `FORMAT=image/png&` +
+                            `TRANSPARENT=true&` +
+                            `CRS=${service.crs}&` +
+                            `STYLES=&` +
+                            `WIDTH=256&` +
+                            `HEIGHT=256&` +
+                            `BBOX={bbox-epsg-3857}`
+                        ],
+                        tileSize: 256,
+                        attribution: service.name
+                    });
+
+                    map.addLayer({
+                        id: mapLayerId,
+                        type: 'raster',
+                        source: sourceId,
+                        paint: {
+                            'raster-opacity': 0.7
+                        }
+                    });
+
+                    wmsLayerSources[layerId] = { serviceKey, layerName, sourceId, mapLayerId };
+                    toggle.classList.add('active');
+                    logClick(`Added ${service.name} - ${layerName}`, 'success');
+                } catch (error) {
+                    logClick(`Error adding ${layerName}: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function setupClickHandlers() {
+            map.on('click', async (e) => {
+                const point = e.point;
+                const coords = e.lngLat;
+
+                console.log('Click detected at:', coords);
+                console.log('Active WMS layers:', Object.keys(wmsLayerSources));
+
+                // Check if click is on any WMS layer
+                const features = map.queryRenderedFeatures(point);
+                console.log('All features at click:', features.map(f => ({ id: f.layer?.id, type: f.layer?.type })));
+
+                const wmsFeatures = features.filter(f =>
+                    f.layer && f.layer.type === 'raster' && Object.keys(wmsLayerSources).some(key =>
+                        wmsLayerSources[key].mapLayerId === f.layer.id
+                    )
+                );
+
+                console.log('WMS features found:', wmsFeatures.length);
+
+                if (wmsFeatures.length === 0) {
+                    // Try clicking on any visible area if layers are loaded
+                    if (Object.keys(wmsLayerSources).length > 0) {
+                        logClick(`Click at [${coords.lng.toFixed(4)}, ${coords.lat.toFixed(4)}] - Testing GetFeatureInfo on loaded layers...`, 'info');
+                        // Test GetFeatureInfo on first loaded layer regardless of exact click location
+                        const firstLayer = Object.values(wmsLayerSources)[0];
+                        if (firstLayer) {
+                            await testGetFeatureInfoClick(firstLayer, point, coords);
+                        }
+                    } else {
+                        logClick(`Click at [${coords.lng.toFixed(4)}, ${coords.lat.toFixed(4)}] - No WMS layers loaded`, 'warning');
+                    }
+                    return;
+                }
+
+                // Find which WMS layer was clicked
+                const clickedLayerId = wmsFeatures[0].layer.id;
+                const layerInfo = Object.values(wmsLayerSources).find(info => info.mapLayerId === clickedLayerId);
+
+                console.log('Clicked layer info:', layerInfo);
+
+                if (layerInfo) {
+                    await testGetFeatureInfoClick(layerInfo, point, coords);
+                }
+            });
+
+            // Change cursor on hover over WMS layers
+            map.on('mousemove', (e) => {
+                const features = map.queryRenderedFeatures(e.point);
+                const wmsFeatures = features.filter(f =>
+                    f.layer && f.layer.type === 'raster' && Object.keys(wmsLayerSources).some(key =>
+                        wmsLayerSources[key].mapLayerId === f.layer.id
+                    )
+                );
+
+                // Show pointer cursor if any WMS layers are loaded
+                const hasWMSLayers = Object.keys(wmsLayerSources).length > 0;
+                map.getCanvas().style.cursor = (wmsFeatures.length > 0 || hasWMSLayers) ? 'pointer' : '';
+            });
+        }
+
+        async function testGetFeatureInfoClick(layerInfo, point, coords) {
+            const service = wmsServices[layerInfo.serviceKey];
+            const layerName = layerInfo.layerName;
+
+            console.log('Testing GetFeatureInfo for:', service.name, layerName);
+            logClick(`Testing GetFeatureInfo for ${service.name} - ${layerName}`, 'info');
+
+            try {
+                // Test formats in order of preference for each service
+                let formats;
+                if (layerInfo.serviceKey === 'canalisations') {
+                    // BRGM typically supports text/plain and text/html
+                    formats = ['text/plain', 'text/html', 'application/json'];
+                } else if (layerInfo.serviceKey === 'enedis') {
+                    // GeoBretagne might support different formats
+                    formats = ['application/json', 'text/plain', 'text/html'];
+                } else {
+                    // Default format order
+                    formats = ['text/plain', 'text/html', 'application/json'];
+                }
+
+                let result = null;
+
+                for (const format of formats) {
+                    try {
+                        console.log(`Trying format: ${format}`);
+                        result = await testGetFeatureInfo(service, layerName, point, coords, format);
+                        console.log(`Format ${format} result:`, result);
+
+                        // Accept any successful response, even if no features found
+                        if (result.success) {
+                            break;
+                        }
+                    } catch (error) {
+                        console.log(`Format ${format} failed:`, error.message);
+                        logClick(`Format ${format} failed: ${error.message}`, 'warning');
+                    }
+                }
+
+                if (result && result.success) {
+                    displayClickResult(service, layerName, coords, result);
+                } else {
+                    logClick(`All formats failed for ${layerName}`, 'error');
+                    displayClickResult(service, layerName, coords, {
+                        success: false,
+                        hasData: false,
+                        format: 'none',
+                        analysis: { featureCount: 0, attributes: [], dataQuality: 'all_formats_failed', isServiceException: true }
+                    });
+                }
+            } catch (error) {
+                console.error('GetFeatureInfo error:', error);
+                logClick(`GetFeatureInfo error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayClickResult(service, layerName, coords, result) {
+            const resultsDiv = document.getElementById('click-results');
+
+            // Check for service exceptions
+            if (result.analysis && result.analysis.isServiceException) {
+                const errorMessage = result.analysis.errorMessage || 'Unknown service error';
+                const html = `
+                    <div class="feature-details" style="border-left-color: #dc3545;">
+                        <strong>❌ ${service.name} - ${layerName.replace(/_/g, ' ')}</strong><br>
+                        <small>Location: [${coords.lng.toFixed(4)}, ${coords.lat.toFixed(4)}]</small><br>
+                        <small>Format: ${result.format} | Pixel: [${result.pixelCoords?.x || 'N/A'}, ${result.pixelCoords?.y || 'N/A'}]</small><br>
+                        <br>
+                        <strong style="color: #dc3545;">Service Exception:</strong><br>
+                        <small>${errorMessage}</small><br>
+                        <br>
+                        <small style="color: #666;">Try clicking in a different area or zooming in/out.</small>
+                    </div>
+                `;
+                resultsDiv.innerHTML = html;
+                return;
+            }
+
+            // Check for no data
+            if (result.analysis && result.analysis.dataQuality === 'no_data') {
+                const html = `
+                    <div class="feature-details" style="border-left-color: #ffc107;">
+                        <strong>📍 ${service.name} - ${layerName.replace(/_/g, ' ')}</strong><br>
+                        <small>Location: [${coords.lng.toFixed(4)}, ${coords.lat.toFixed(4)}]</small><br>
+                        <small>Format: ${result.format} | Pixel: [${result.pixelCoords?.x || 'N/A'}, ${result.pixelCoords?.y || 'N/A'}]</small><br>
+                        <br>
+                        <strong style="color: #ffc107;">No Features Found:</strong><br>
+                        <small>No pipeline or infrastructure features at this location.</small><br>
+                        <br>
+                        <small style="color: #666;">Try clicking in industrial areas, cities, or along known pipeline routes.</small>
+                    </div>
+                `;
+                resultsDiv.innerHTML = html;
+                return;
+            }
+
+            const html = `
+                <div class="feature-details">
+                    <strong>📍 ${service.name} - ${layerName.replace(/_/g, ' ')}</strong><br>
+                    <small>Location: [${coords.lng.toFixed(4)}, ${coords.lat.toFixed(4)}]</small><br>
+                    <small>Format: ${result.format} | Features: ${result.analysis?.featureCount || 'N/A'} | Pixel: [${result.pixelCoords?.x || 'N/A'}, ${result.pixelCoords?.y || 'N/A'}]</small>
+                    
+                    ${result.analysis ? `
+                        <div style="margin-top: 10px;">
+                            <strong>📊 Attributes found (${result.analysis.attributes.length}):</strong><br>
+                            <div class="attribute-grid">
+                                ${result.analysis.attributes.slice(0, 12).map(attr =>
+                `<span class="attribute-name">${attr}:</span><span class="attribute-value">Found</span>`
+            ).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${result.analysis && result.analysis.expectedAttributesFound && result.analysis.expectedAttributesFound.length > 0 ? `
+                        <div style="margin-top: 8px;">
+                            <strong>🎯 Expected attributes found:</strong><br>
+                            <small style="color: #28a745;">
+                                ${result.analysis.expectedAttributesFound.join(', ')}
+                            </small>
+                        </div>
+                    ` : ''}
+                    
+                    ${result.analysis && result.analysis.sampleFeature ? `
+                        <div style="margin-top: 10px;">
+                            <strong>📋 Sample Data:</strong><br>
+                            <div class="attribute-grid">
+                                ${Object.entries(result.analysis.sampleFeature.properties)
+                        .slice(0, 8)
+                        .map(([key, value]) =>
+                            `<span class="attribute-name">${key}:</span><span class="attribute-value">${formatValue(value)}</span>`
+                        ).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${!result.hasData ? `
+                        <div style="margin-top: 10px; color: #666;">
+                            <small>No feature data returned at this location. Try clicking in a different area.</small>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function logClick(message, type = 'info') {
+            const resultsDiv = document.getElementById('click-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `test-result ${type}`;
+            logEntry.style.marginBottom = '5px';
+            logEntry.innerHTML = `<small>[${timestamp}] ${message}</small>`;
+
+            resultsDiv.insertBefore(logEntry, resultsDiv.firstChild);
+
+            // Keep only last 5 entries
+            while (resultsDiv.children.length > 5) {
+                resultsDiv.removeChild(resultsDiv.lastChild);
+            }
+        }
+
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', initMap);
+
+        async function testWMSService(serviceKey, service) {
+            const result = {
+                service: service.name,
+                getFeatureInfo: { supported: false, formats: [], error: null },
+                layers: [],
+                recommendations: []
+            };
+
+            try {
+                // Test 1: Check service capabilities
+                const capabilities = await getCapabilities(service.baseUrl);
+                result.getFeatureInfo.supported = capabilities.supportsGetFeatureInfo;
+                result.getFeatureInfo.formats = capabilities.infoFormats;
+
+                // Test 2: Test each layer
+                for (const layerName of service.layers.slice(0, 2)) { // Test first 2 layers
+                    const layerResult = await testLayer(service, layerName);
+                    result.layers.push(layerResult);
+                }
+
+                // Generate recommendations
+                result.recommendations = generateRecommendations(result);
+
+            } catch (error) {
+                result.getFeatureInfo.error = error.message;
+            }
+
+            testResults[serviceKey] = result;
+            displayServiceResult(serviceKey, result);
+        }
+
+        async function getCapabilities(baseUrl) {
+            const url = `${baseUrl}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities`;
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+
+                // Parse XML for GetFeatureInfo support
+                const supportsGetFeatureInfo = text.includes('GetFeatureInfo') || text.includes('getfeatureinfo');
+                const infoFormats = [];
+
+                // Extract info formats
+                const formatMatches = text.match(/<InfoFormat[^>]*>([^<]+)<\/InfoFormat>/gi);
+                if (formatMatches) {
+                    formatMatches.forEach(match => {
+                        const format = match.replace(/<[^>]*>/g, '').trim();
+                        if (format && !infoFormats.includes(format)) {
+                            infoFormats.push(format);
+                        }
+                    });
+                }
+
+                return {
+                    supportsGetFeatureInfo,
+                    infoFormats: infoFormats.length > 0 ? infoFormats : ['application/json', 'text/html', 'text/plain']
+                };
+            } catch (error) {
+                return {
+                    supportsGetFeatureInfo: false,
+                    infoFormats: []
+                };
+            }
+        }
+
+        async function testLayer(service, layerName) {
+            const results = [];
+
+            // Test multiple locations for better coverage
+            for (const location of service.testLocations.slice(0, 2)) {
+                const testPoint = { x: 128, y: 128 }; // Center of tile
+                const formats = ['application/json', 'text/html', 'text/plain'];
+
+                for (const format of formats) {
+                    try {
+                        const result = await testGetFeatureInfo(service, layerName, testPoint, location, format);
+                        result.testLocation = location.name;
+                        results.push(result);
+
+                        // If we found data for this location, no need to test other formats
+                        if (result.success && result.hasData) {
+                            break;
+                        }
+                    } catch (error) {
+                        results.push({
+                            format,
+                            success: false,
+                            error: error.message,
+                            testLocation: location.name
+                        });
+                    }
+                }
+
+                // If we found data at this location, move to next layer
+                const hasData = results.some(r => r.testLocation === location.name && r.success && r.hasData);
+                if (hasData) {
+                    break;
+                }
+            }
+
+            return {
+                layerName,
+                results
+            };
+        }
+
+        async function testGetFeatureInfo(service, layerName, point, coords, format) {
+            // Calculate proper bounds and pixel coordinates
+            const bounds = map.getBounds();
+            const mapCanvas = map.getCanvas();
+            const mapWidth = mapCanvas.width;
+            const mapHeight = mapCanvas.height;
+
+            // Convert click point to relative pixel coordinates (0-255 for 256x256 tile)
+            const tileSize = 256;
+            const relativeX = Math.floor((point.x / mapWidth) * tileSize);
+            const relativeY = Math.floor((point.y / mapHeight) * tileSize);
+
+            // Ensure coordinates are within tile bounds
+            const pixelX = Math.max(0, Math.min(tileSize - 1, relativeX));
+            const pixelY = Math.max(0, Math.min(tileSize - 1, relativeY));
+
+            const params = new URLSearchParams({
+                SERVICE: 'WMS',
+                VERSION: service.version,
+                REQUEST: 'GetFeatureInfo',
+                LAYERS: layerName,
+                QUERY_LAYERS: layerName,
+                INFO_FORMAT: format,
+                FEATURE_COUNT: '10',
+                I: pixelX.toString(),
+                J: pixelY.toString(),
+                CRS: service.crs,
+                WIDTH: tileSize.toString(),
+                HEIGHT: tileSize.toString(),
+                BBOX: `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`,
+                FORMAT: 'image/png',
+                TRANSPARENT: 'true',
+                STYLES: ''
+            });
+
+            const url = `${service.baseUrl}?${params}`;
+            console.log('GetFeatureInfo URL:', url);
+            console.log('Pixel coordinates:', { x: pixelX, y: pixelY, original: point, mapSize: { width: mapWidth, height: mapHeight } });
+
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            console.log('Content type:', contentType);
+            let data;
+
+            try {
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                    console.log('Raw response (first 500 chars):', data.substring(0, 500));
+                }
+            } catch (error) {
+                console.error('Error parsing response:', error);
+                data = await response.text();
+            }
+
+            // Parse and analyze the response data
+            const analysis = analyzeFeatureData(data, layerName, service.expectedAttributes);
+
+            return {
+                format,
+                success: true,
+                contentType,
+                hasData: typeof data === 'object' ?
+                    (data.features && data.features.length > 0) :
+                    (data && data.trim().length > 0 && !data.includes('no features') && !data.includes('<?xml') && !data.includes('ServiceException')),
+                data: typeof data === 'string' ? data.substring(0, 1000) + '...' : data,
+                analysis: analysis,
+                testLocation: coords.name || 'Unknown',
+                pixelCoords: { x: pixelX, y: pixelY }
+            };
+        }
+
+        function analyzeFeatureData(data, layerName, expectedAttributes) {
+            const analysis = {
+                featureCount: 0,
+                attributes: [],
+                sampleFeature: null,
+                expectedAttributesFound: [],
+                dataQuality: 'unknown',
+                rawDataType: typeof data,
+                isServiceException: false
+            };
+
+            console.log('Analyzing data type:', typeof data);
+            console.log('Data sample:', typeof data === 'string' ? data.substring(0, 200) : data);
+
+            if (typeof data === 'string') {
+                // Check for service exceptions
+                if (data.includes('ServiceException') || data.includes('InvalidPoint') || data.includes('InvalidFormat')) {
+                    console.log('Service exception detected');
+                    analysis.isServiceException = true;
+                    analysis.dataQuality = 'error';
+
+                    // Extract error message
+                    const errorMatch = data.match(/<ServiceException[^>]*>([^<]+)<\/ServiceException>/);
+                    if (errorMatch) {
+                        analysis.errorMessage = errorMatch[1].trim();
+                    }
+
+                    return analysis;
+                }
+
+                // Check for "no results" messages
+                if (data.includes('no results') || data.includes('No matching record') || data.includes('Search returned no results')) {
+                    console.log('No results found');
+                    analysis.dataQuality = 'no_data';
+                    return analysis;
+                }
+            }
+
+            if (typeof data === 'object' && data.features) {
+                // JSON response
+                analysis.featureCount = data.features.length;
+                console.log('JSON response with features:', data.features.length);
+
+                if (data.features.length > 0) {
+                    const feature = data.features[0];
+                    analysis.sampleFeature = feature;
+                    analysis.attributes = Object.keys(feature.properties || {});
+
+                    // Check for expected attributes
+                    const expected = Array.isArray(expectedAttributes) ?
+                        expectedAttributes :
+                        (expectedAttributes[layerName] || []);
+
+                    analysis.expectedAttributesFound = expected.filter(attr =>
+                        analysis.attributes.includes(attr)
+                    );
+
+                    analysis.dataQuality = analysis.expectedAttributesFound.length > expected.length * 0.5 ?
+                        'good' : 'limited';
+                }
+            } else if (typeof data === 'string') {
+                // Text/HTML/XML response
+                console.log('String response detected');
+
+                // Check if it's XML with actual features
+                if (data.includes('<?xml')) {
+                    console.log('XML response detected');
+
+                    // Look for feature elements in XML
+                    const featureMatches = data.match(/<Feature[^>]*>/g);
+                    analysis.featureCount = featureMatches ? featureMatches.length : 0;
+
+                    // Try to extract attributes from XML features
+                    const attributeMatches = data.match(/<Attribute[^>]*name="([^"]*)"[^>]*value="([^"]*)"[^>]*>/g);
+                    if (attributeMatches) {
+                        const attributes = new Set();
+                        const featureData = {};
+
+                        attributeMatches.forEach(match => {
+                            const nameMatch = match.match(/name="([^"]*)"/);
+                            const valueMatch = match.match(/value="([^"]*)"/);
+                            if (nameMatch && valueMatch) {
+                                attributes.add(nameMatch[1]);
+                                featureData[nameMatch[1]] = valueMatch[1];
+                            }
+                        });
+
+                        analysis.attributes = Array.from(attributes);
+                        if (Object.keys(featureData).length > 0) {
+                            analysis.sampleFeature = { properties: featureData };
+                        }
+                    }
+
+                    // Check for expected attributes
+                    const expected = Array.isArray(expectedAttributes) ?
+                        expectedAttributes :
+                        (expectedAttributes[layerName] || []);
+
+                    analysis.expectedAttributesFound = expected.filter(attr =>
+                        analysis.attributes.includes(attr)
+                    );
+
+                    analysis.dataQuality = analysis.expectedAttributesFound.length > 0 ? 'good' :
+                        analysis.attributes.length > 0 ? 'limited' : 'poor';
+
+                } else {
+                    // Plain text response
+                    console.log('Plain text response');
+                    analysis.featureCount = (data.match(/Feature/g) || []).length;
+
+                    // Try to extract attributes from text
+                    const attrMatches = data.match(/(\w+)=\s*([^\s\n]+)/g) || data.match(/(\w+):\s*([^\n]+)/g);
+
+                    if (attrMatches) {
+                        const attributes = new Set();
+                        attrMatches.forEach(match => {
+                            const nameMatch = match.match(/(\w+)=/);
+                            if (nameMatch) {
+                                attributes.add(nameMatch[1]);
+                            }
+                        });
+                        analysis.attributes = Array.from(attributes);
+                    }
+
+                    analysis.dataQuality = analysis.attributes.length > 5 ? 'good' :
+                        analysis.attributes.length > 0 ? 'limited' : 'poor';
+                }
+            }
+
+            console.log('Analysis result:', analysis);
+            return analysis;
+        }
+
+        function generateRecommendations(result) {
+            const recommendations = [];
+
+            if (!result.getFeatureInfo.supported) {
+                recommendations.push('❌ GetFeatureInfo not supported - consider alternative data sources');
+            } else {
+                recommendations.push('✅ GetFeatureInfo supported');
+
+                if (result.getFeatureInfo.formats.includes('application/json')) {
+                    recommendations.push('📊 JSON format available - recommended for structured data');
+                } else if (result.getFeatureInfo.formats.includes('text/html')) {
+                    recommendations.push('🌐 HTML format available - may require parsing');
+                }
+            }
+
+            const workingLayers = result.layers.filter(l => l.results.some(r => r.success && r.hasData));
+            if (workingLayers.length > 0) {
+                recommendations.push(`🎯 ${workingLayers.length} layer(s) return feature data`);
+            } else {
+                recommendations.push('⚠️ No layers returned feature data in test area');
+            }
+
+            return recommendations;
+        }
+
+        function displayServiceResult(serviceKey, result) {
+            const detailedDiv = document.getElementById('detailed-results');
+
+            const html = `
+                <div class="test-section">
+                    <h3>${result.service}</h3>
+                    
+                    <div class="test-result ${result.getFeatureInfo.supported ? 'success' : 'error'}">
+                        <strong>GetFeatureInfo:</strong> ${result.getFeatureInfo.supported ? 'Supported' : 'Not Supported'}
+                        ${result.getFeatureInfo.error ? `<br><small>Error: ${result.getFeatureInfo.error}</small>` : ''}
+                    </div>
+
+                    ${result.getFeatureInfo.formats.length > 0 ? `
+                    <div class="test-result info">
+                        <strong>Available Formats:</strong> ${result.getFeatureInfo.formats.join(', ')}
+                    </div>
+                    ` : ''}
+
+                    ${result.layers.map(layer => `
+                    <div class="test-result">
+                        <strong>Layer: ${layer.layerName}</strong>
+                        <div>
+                            ${layer.results.map(r => `
+                                <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                                    <small>
+                                        <strong>${r.format} (${r.testLocation || 'Unknown location'}):</strong> 
+                                        ${r.success ?
+                    (r.hasData ? '✅ Data returned' : '⚠️ No data') :
+                    `❌ Error: ${r.error}`}
+                                    </small>
+                                    
+                                    ${r.success && r.hasData && r.analysis ? `
+                                        <div style="margin-top: 10px;">
+                                            <strong>📊 Feature Analysis:</strong><br>
+                                            <small>
+                                                • Features found: ${r.analysis.featureCount}<br>
+                                                • Data quality: ${r.analysis.dataQuality}<br>
+                                                • Attributes: ${r.analysis.attributes.length > 0 ? r.analysis.attributes.slice(0, 8).join(', ') + (r.analysis.attributes.length > 8 ? '...' : '') : 'None detected'}
+                                            </small>
+                                            
+                                            ${r.analysis.expectedAttributesFound && r.analysis.expectedAttributesFound.length > 0 ? `
+                                                <div style="margin-top: 8px;">
+                                                    <strong>🎯 Expected attributes found:</strong><br>
+                                                    <small style="color: #28a745;">
+                                                        ${r.analysis.expectedAttributesFound.join(', ')}
+                                                    </small>
+                                                </div>
+                                            ` : ''}
+                                            
+                                            ${r.analysis.sampleFeature && r.analysis.sampleFeature.properties ? `
+                                                <div style="margin-top: 10px;">
+                                                    <strong>📋 Sample feature data:</strong><br>
+                                                    <div style="max-height: 200px; overflow-y: auto; background: white; padding: 8px; border-radius: 4px; font-size: 11px;">
+                                                        ${Object.entries(r.analysis.sampleFeature.properties)
+                            .slice(0, 10)
+                            .map(([key, value]) =>
+                                `<div><strong>${key}:</strong> ${formatValue(value)}</div>`
+                            ).join('')}
+                                                        ${Object.keys(r.analysis.sampleFeature.properties).length > 10 ? '<div><em>... and more</em></div>' : ''}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${r.success && r.hasData && !r.analysis ? `
+                                        <div style="margin-top: 10px;">
+                                            <strong>📄 Raw response:</strong><br>
+                                            <pre style="max-height: 150px; overflow-y: auto; font-size: 10px; background: white; padding: 8px; border-radius: 4px;">
+                                                ${r.data}
+                                            </pre>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    `).join('')}
+
+                    <div class="test-result info">
+                        <strong>Recommendations:</strong>
+                        <ul>
+                            ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            detailedDiv.innerHTML += html;
+        }
+
+        function formatValue(value) {
+            if (value === null || value === undefined) return 'N/A';
+            if (typeof value === 'number') return value.toLocaleString();
+            if (typeof value === 'string' && value.length > 100) return value.substring(0, 100) + '...';
+            return String(value);
+        }
+
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+
+</html>

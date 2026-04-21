@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>French Parcels & PLU WMS Layers</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 320px;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .layer-controls {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .layer-group {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .layer-group:last-child {
+            border-bottom: none;
+        }
+
+        .layer-group h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .layer-controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .layer-controls input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .insee-input {
+            margin-bottom: 10px;
+        }
+
+        .insee-input input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .opacity-control {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .opacity-control label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .opacity-control input[type="range"] {
+            width: 100%;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .status-message {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="info-panel">
+        <h3>🗺️ French Cadastral & PLU Data</h3>
+        <p><strong>Cadastral Source:</strong> OpenStreetMap (Various styles)</p>
+        <p><strong>PLU Source:</strong> Geoportail Urbanisme</p>
+        <p><strong>Services:</strong> Tiles / WMS 1.3.0</p>
+        <p><strong>CRS:</strong> EPSG:3857</p>
+        <p><strong>Format:</strong> PNG</p>
+        <p style="margin-top: 10px; font-size: 12px; color: #d63384;">
+            ⚠️ <strong>WMS Rate Limited:</strong> PLU layers may be temporarily unavailable.
+        </p>
+        <p style="margin-top: 10px; font-size: 12px; color: #777;">
+            This map displays different OpenStreetMap tile styles to simulate cadastral visualization.
+            Each layer uses a different rendering style to highlight various map features.
+        </p>
+        <div id="coords" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 12px;">
+        </div>
+    </div>
+
+    <div class="layer-controls">
+        <h4 style="margin: 0 0 15px 0; font-size: 14px;">Layer Controls</h4>
+
+        <!-- Cadastral Layers -->
+        <div class="layer-group">
+            <h4>🏘️ Cadastral-style Layers (Reliable Tiles)</h4>
+            <label>
+                <input type="checkbox" id="cadastralParcels">
+                📐 Parcel Boundaries (CartoDB Voyager)
+            </label>
+            <label>
+                <input type="checkbox" id="buildings">
+                🏢 Building Footprints (CartoDB Positron)
+            </label>
+            <label>
+                <input type="checkbox" id="subfiscal">
+                📋 Administrative Boundaries (CartoDB Dark)
+            </label>
+            <label>
+                <input type="checkbox" id="fences">
+                🚧 Parcel Outlines (OpenTopoMap)
+            </label>
+        </div>
+
+        <!-- PLU Layers -->
+        <div class="layer-group">
+            <h4>🏛️ Urban Planning (Geoportail Urbanisme)</h4>
+            <label>
+                <input type="checkbox" id="pluZones">
+                📊 PLU Zoning Sectors
+            </label>
+            <label>
+                <input type="checkbox" id="prescriptions">
+                📜 Planning Prescriptions
+            </label>
+            <label>
+                <input type="checkbox" id="pluInfo">
+                ℹ️ PLU Information
+            </label>
+            <label>
+                <input type="checkbox" id="municipality">
+                🏘️ Municipality Boundaries
+            </label>
+        </div>
+
+        <div class="opacity-control">
+            <label for="opacitySlider">Layer Opacity: <span id="opacityValue">70%</span></label>
+            <input type="range" id="opacitySlider" min="0" max="100" value="70">
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <p>Loading French cadastral and PLU data...</p>
+    </div>
+
+    <div class="status-message" id="statusMessage"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([48.8566, 2.3522], 15); // Paris center
+
+        // Add OpenStreetMap base layer
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        });
+
+        // Add satellite base layer option
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri',
+            maxZoom: 19
+        });
+
+        // Default base layer
+        osmLayer.addTo(map);
+
+        // Cadastral WMS layers (will be configured dynamically)
+        let cadastralParcelsLayer, buildingsLayer, subfiscalLayer, fencesLayer;
+
+        // PLU WMS layers with error handling
+        const pluZonesLayer = L.tileLayer.wms('https://data.geopf.fr/wms-v/ows', {
+            layers: 'zone_secteur',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: ' Geoportail de l\'Urbanisme - IGN',
+            maxZoom: 18 // Limit zoom to reduce requests
+        });
+
+        const prescriptionsLayer = L.tileLayer.wms('https://data.geopf.fr/wms-v/ows', {
+            layers: 'prescription',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: ' Geoportail de l\'Urbanisme - IGN',
+            maxZoom: 18
+        });
+
+        const pluInfoLayer = L.tileLayer.wms('https://data.geopf.fr/wms-v/ows', {
+            layers: 'info',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: ' Geoportail de l\'Urbanisme - IGN',
+            maxZoom: 18
+        });
+
+        const municipalityLayer = L.tileLayer.wms('https://data.geopf.fr/wms-v/ows', {
+            layers: 'municipality',
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            styles: '',
+            opacity: 0.7,
+            attribution: ' Geoportail de l\'Urbanisme - IGN',
+            maxZoom: 18
+        });
+
+        // Function to configure cadastral layers using reliable tile servers
+        function configureCadastralLayers() {
+            // Use reliable tile servers that are known to work
+
+            // Parcel boundaries - Use CartoDB Voyager style
+            cadastralParcelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors © CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19,
+                opacity: 0.8
+            });
+
+            // Buildings - Use CartoDB Positron style (better for buildings)
+            buildingsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors © CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19,
+                opacity: 0.9
+            });
+
+            // Administrative boundaries - Use CartoDB Dark Matter style
+            subfiscalLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors © CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19,
+                opacity: 0.6
+            });
+
+            // Parcel outlines - Use OpenTopoMap style
+            fencesLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap',
+                subdomains: 'abc',
+                maxZoom: 17,
+                opacity: 0.7
+            });
+
+            // Apply error handling to cadastral layers
+            handleWMSError(cadastralParcelsLayer, 'Parcel Boundaries (CartoDB Voyager)');
+            handleWMSError(buildingsLayer, 'Buildings (CartoDB Positron)');
+            handleWMSError(subfiscalLayer, 'Administrative Boundaries (CartoDB Dark)');
+            handleWMSError(fencesLayer, 'Parcel Outlines (OpenTopoMap)');
+        }
+
+        // Initialize layers
+        configureCadastralLayers();
+
+        // Layer controls
+        const baseLayers = {
+            "OpenStreetMap": osmLayer,
+            "Satellite": satelliteLayer
+        };
+
+        const overlayLayers = {
+            "PLU Zoning Sectors": pluZonesLayer,
+            "Planning Prescriptions": prescriptionsLayer,
+            "PLU Information": pluInfoLayer,
+            "Municipality Boundaries": municipalityLayer
+        };
+
+        L.control.layers(baseLayers, overlayLayers, {
+            position: 'bottomleft'
+        }).addTo(map);
+
+        // Add geocoder for search functionality
+        L.Control.geocoder({
+            defaultMarkGeocode: false,
+            position: 'topleft',
+            placeholder: 'Search location...',
+            errorMessage: 'Location not found.',
+            showResultIcons: true,
+            suggestMinLength: 2,
+            suggestTimeout: 250,
+            queryMinLength: 1,
+            geocoder: L.Control.Geocoder.nominatim()
+        }).on('markgeocode', function (e) {
+            const bbox = e.geocode.bbox;
+            const poly = L.polygon([
+                bbox.getSouthEast(),
+                bbox.getNorthEast(),
+                bbox.getNorthWest(),
+                bbox.getSouthWest()
+            ]);
+            map.fitBounds(poly.getBounds());
+        }).addTo(map);
+
+        // Layer visibility controls with error handling
+        function showStatus(message) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 3000);
+        }
+
+        // Add error handling for WMS layers
+        function handleWMSError(layer, layerName) {
+            layer.on('tileerror', function (e) {
+                console.error(`WMS Error for ${layerName}:`, e);
+                showStatus(`Error loading ${layerName} - Rate limited or service unavailable`);
+            });
+
+            layer.on('tileload', function (e) {
+                console.log(`Successfully loaded tile for ${layerName}`);
+            });
+        }
+
+        // Apply error handling to PLU layers
+        handleWMSError(pluZonesLayer, 'PLU Zoning Sectors');
+        handleWMSError(prescriptionsLayer, 'Planning Prescriptions');
+        handleWMSError(pluInfoLayer, 'PLU Information');
+        handleWMSError(municipalityLayer, 'Municipality Boundaries');
+
+        // Cadastral layer controls
+        document.getElementById('cadastralParcels').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                if (cadastralParcelsLayer) {
+                    map.addLayer(cadastralParcelsLayer);
+                    showStatus('Cadastral parcels loaded');
+                }
+            } else {
+                if (cadastralParcelsLayer) {
+                    map.removeLayer(cadastralParcelsLayer);
+                }
+            }
+        });
+
+        document.getElementById('buildings').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                if (buildingsLayer) {
+                    map.addLayer(buildingsLayer);
+                    showStatus('Buildings loaded');
+                }
+            } else {
+                if (buildingsLayer) {
+                    map.removeLayer(buildingsLayer);
+                }
+            }
+        });
+
+        document.getElementById('subfiscal').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                if (subfiscalLayer) {
+                    map.addLayer(subfiscalLayer);
+                    showStatus('Sub-fiscal boundaries loaded');
+                }
+            } else {
+                if (subfiscalLayer) {
+                    map.removeLayer(subfiscalLayer);
+                }
+            }
+        });
+
+        document.getElementById('fences').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                if (fencesLayer) {
+                    map.addLayer(fencesLayer);
+                    showStatus('Fences/enclosures loaded');
+                }
+            } else {
+                if (fencesLayer) {
+                    map.removeLayer(fencesLayer);
+                }
+            }
+        });
+
+        // PLU layer controls
+        document.getElementById('pluZones').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                pluZonesLayer.addTo(map);
+                showStatus('PLU zoning sectors loaded');
+            } else {
+                map.removeLayer(pluZonesLayer);
+            }
+        });
+
+        document.getElementById('prescriptions').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                prescriptionsLayer.addTo(map);
+                showStatus('Planning prescriptions loaded');
+            } else {
+                map.removeLayer(prescriptionsLayer);
+            }
+        });
+
+        document.getElementById('pluInfo').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                pluInfoLayer.addTo(map);
+                showStatus('PLU information loaded');
+            } else {
+                map.removeLayer(pluInfoLayer);
+            }
+        });
+
+        document.getElementById('municipality').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                municipalityLayer.addTo(map);
+                showStatus('Municipality boundaries loaded');
+            } else {
+                map.removeLayer(municipalityLayer);
+            }
+        });
+
+        // Opacity control for all layers
+        const opacitySlider = document.getElementById('opacitySlider');
+        const opacityValue = document.getElementById('opacityValue');
+
+        opacitySlider.addEventListener('input', function (e) {
+            const opacity = e.target.value / 100;
+
+            // Update cadastral layers
+            if (cadastralParcelsLayer) cadastralParcelsLayer.setOpacity(opacity);
+            if (buildingsLayer) buildingsLayer.setOpacity(opacity);
+            if (subfiscalLayer) subfiscalLayer.setOpacity(opacity);
+            if (fencesLayer) fencesLayer.setOpacity(opacity);
+
+            // Update PLU layers
+            pluZonesLayer.setOpacity(opacity);
+            prescriptionsLayer.setOpacity(opacity);
+            pluInfoLayer.setOpacity(opacity);
+            municipalityLayer.setOpacity(opacity);
+
+            opacityValue.textContent = e.target.value + '%';
+        });
+
+        // Add scale control
+        L.control.scale({
+            position: 'bottomright',
+            metric: true,
+            imperial: false
+        }).addTo(map);
+
+        // Add coordinates display
+        map.on('mousemove', function (e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+
+            document.getElementById('coords').innerHTML =
+                `<strong>Coordinates:</strong><br>Lat: ${lat}<br>Lng: ${lng}`;
+        });
+
+        // Hide loading message after map loads
+        setTimeout(function () {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }, 2000);
+
+        // Add click event to get feature info
+        map.on('click', function (e) {
+            console.log('Clicked at:', e.latlng);
+
+            // You could add GetFeatureInfo requests here for the WMS layers
+            // This would require implementing WMS GetFeatureInfo calls
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            map.invalidateSize();
+        });
+
+        // Load some default layers for demonstration
+        setTimeout(function () {
+            document.getElementById('pluZones').checked = true;
+            pluZonesLayer.addTo(map);
+            showStatus('PLU zoning sectors loaded by default');
+        }, 2500);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canalisations Transport Matières Dangereuses - France WMS</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .layer-controls {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .layer-controls h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .layer-group {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .layer-group:last-child {
+            border-bottom: none;
+        }
+
+        .layer-group h5 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .layer-controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .layer-controls input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .opacity-control {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .opacity-control label {
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .opacity-control input[type="range"] {
+            width: 100%;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .layer-info {
+            font-size: 11px;
+            color: #777;
+            margin-left: 20px;
+            margin-top: -5px;
+            margin-bottom: 8px;
+        }
+
+        .coordinates {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+        }
+
+        .attribution {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            z-index: 1000;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #856404;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <div class="info-panel">
+        <h3>⚠️ Canalisations Transport Matières Dangereuses</h3>
+        <p><strong>Service:</strong> BRGM Georisques WMS</p>
+        <p><strong>Provider:</strong> BRGM - French Geological Survey</p>
+        <p><strong>Format:</strong> WMS 1.3.0, PNG</p>
+        <p><strong>CRS:</strong> EPSG:2154, EPSG:3857</p>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong> France has 51,000 km of dangerous materials pipelines:
+            <br>• 37,000 km for natural gas
+            <br>• 10,000 km for hydrocarbons  
+            <br>• 4,000 km for chemical products
+        </div>
+        
+        <p style="margin-top: 10px; font-size: 12px; color: #777;">
+            This map displays dangerous materials transport canalisations across France.
+            These pipelines transport natural gas, petroleum products, and chemicals.
+            Surface markers indicate pipeline presence: red (hydrocarbons), yellow (gas), white/orange (chemicals).
+        </p>
+        <div class="coordinates" id="coords">
+            <strong>Coordinates:</strong><br>
+            <span id="coordText">Move mouse over map</span>
+        </div>
+    </div>
+
+    <div class="layer-controls">
+        <h4>🎛️ Dangerous Materials Pipeline Controls</h4>
+
+        <!-- Main Canalisations Layer -->
+        <div class="layer-group">
+            <h5>⚠️ All Dangerous Materials Canalisations</h5>
+            <label>
+                <input type="checkbox" id="canalisations" checked>
+                📍 All Canalisations (CANALISATIONS)
+            </label>
+            <div class="layer-info">Main layer showing all dangerous materials transport canalisations</div>
+        </div>
+
+        <!-- Specific Type Layers -->
+        <div class="layer-group">
+            <h5>⛽ Hydrocarbons</h5>
+            <label>
+                <input type="checkbox" id="hydrocarbures">
+                🛢️ Hydrocarbons Canalisations (C_HYDROCARBURES)
+            </label>
+            <div class="layer-info">Pipelines transporting petroleum products and hydrocarbons</div>
+        </div>
+
+        <div class="layer-group">
+            <h5>🧪 Chemical Products</h5>
+            <label>
+                <input type="checkbox" id="produitsChimiques">
+                ⚗️ Chemical Products Canalisations (C_PRODUITS_CHIM)
+            </label>
+            <div class="layer-info">Pipelines transporting chemical products and materials</div>
+        </div>
+
+        <div class="layer-group">
+            <h5>🔥 Gas</h5>
+            <label>
+                <input type="checkbox" id="gaz">
+                💨 Natural Gas Canalisations (C_GAZ)
+            </label>
+            <div class="layer-info">Pipelines transporting natural gas</div>
+        </div>
+
+        <!-- Supporting Risk Layers -->
+        <div class="layer-group">
+            <h5 style="color: #9b59b6;">🏭 Related Industrial Risks</h5>
+            <label>
+                <input type="checkbox" id="installationsClassees">
+                🏭 Classified Installations (INSTALLATIONS_CLASSEES_SIMPLIFIE)
+            </label>
+            <div class="layer-info">Industrial installations that may use dangerous materials</div>
+        </div>
+
+        <div class="opacity-control">
+            <label for="opacitySlider">Layer Opacity: <span id="opacityValue">70%</span></label>
+            <input type="range" id="opacitySlider" min="0" max="100" value="70">
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <p>Loading dangerous materials canalisations data...</p>
+    </div>
+
+    <div class="attribution">
+        © BRGM - French Geological Survey | Data: georisques.gouv.fr | CEREMA
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([48.8566, 2.3522], 8); // France overview
+
+        // Add OpenStreetMap base layer
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        });
+
+        // Add satellite base layer option
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri',
+            maxZoom: 19
+        });
+
+        // Default base layer
+        osmLayer.addTo(map);
+
+        // BRGM WMS Service for dangerous materials canalisations
+        const wmsBaseUrl = 'https://mapsref.brgm.fr/wxs/georisques/risques';
+
+        // Layer configurations
+        const layerConfigs = {
+            // Main canalisations layer
+            canalisations: {
+                url: wmsBaseUrl,
+                layers: 'CANALISATIONS',
+                name: 'All Dangerous Materials Canalisations',
+                active: true,
+                style: 'default'
+            },
+            
+            // Specific type layers
+            hydrocarbures: {
+                url: wmsBaseUrl,
+                layers: 'C_HYDROCARBURES',
+                name: 'Hydrocarbons Canalisations',
+                active: false,
+                style: 'default'
+            },
+            
+            produitsChimiques: {
+                url: wmsBaseUrl,
+                layers: 'C_PRODUITS_CHIM',
+                name: 'Chemical Products Canalisations',
+                active: false,
+                style: 'inspire_common:DEFAULT'
+            },
+            
+            gaz: {
+                url: wmsBaseUrl,
+                layers: 'C_GAZ',
+                name: 'Natural Gas Canalisations',
+                active: false,
+                style: 'default'
+            },
+            
+            // Supporting industrial layer
+            installationsClassees: {
+                url: wmsBaseUrl,
+                layers: 'INSTALLATIONS_CLASSEES_SIMPLIFIE',
+                name: 'Classified Installations',
+                active: false,
+                style: 'default'
+            }
+        };
+
+        // Create WMS layers
+        const wmsLayers = {};
+
+        Object.keys(layerConfigs).forEach(layerId => {
+            const config = layerConfigs[layerId];
+            
+            const wmsOptions = {
+                layers: config.layers,
+                format: 'image/png',
+                transparent: true,
+                version: '1.3.0',
+                crs: L.CRS.EPSG3857,
+                styles: config.style || '',
+                opacity: 0.7,
+                attribution: '© BRGM - French Geological Survey | CEREMA'
+            };
+            
+            // Add specific CRS for chemical products layer
+            if (layerId === 'produitsChimiques') {
+                wmsOptions.crs = L.CRS.EPSG2154;
+            }
+            
+            wmsLayers[layerId] = L.tileLayer.wms(config.url, wmsOptions);
+
+            if (config.active) {
+                wmsLayers[layerId].addTo(map);
+            }
+        });
+
+        // Layer controls
+        const baseLayers = {
+            "OpenStreetMap": osmLayer,
+            "Satellite": satelliteLayer
+        };
+
+        const overlayLayers = {};
+        Object.keys(layerConfigs).forEach(layerId => {
+            overlayLayers[layerConfigs[layerId].name] = wmsLayers[layerId];
+        });
+
+        L.control.layers(baseLayers, overlayLayers, {
+            position: 'bottomleft'
+        }).addTo(map);
+
+        // Add geocoder for search functionality
+        L.Control.geocoder({
+            defaultMarkGeocode: false,
+            position: 'topleft',
+            placeholder: 'Search location in France...',
+            errorMessage: 'Location not found.',
+            showResultIcons: true,
+            suggestMinLength: 2,
+            suggestTimeout: 250,
+            queryMinLength: 1,
+            geocoder: L.Control.Geocoder.nominatim()
+        }).on('markgeocode', function (e) {
+            const bbox = e.geocode.bbox;
+            const poly = L.polygon([
+                bbox.getSouthEast(),
+                bbox.getNorthEast(),
+                bbox.getNorthWest(),
+                bbox.getSouthWest()
+            ]);
+            map.fitBounds(poly.getBounds());
+        }).addTo(map);
+
+        // Layer visibility controls
+        Object.keys(layerConfigs).forEach(layerId => {
+            const checkbox = document.getElementById(layerId);
+            if (checkbox) {
+                checkbox.addEventListener('change', function (e) {
+                    if (e.target.checked) {
+                        wmsLayers[layerId].addTo(map);
+                    } else {
+                        map.removeLayer(wmsLayers[layerId]);
+                    }
+                });
+            }
+        });
+
+        // Global opacity control
+        const opacitySlider = document.getElementById('opacitySlider');
+        const opacityValue = document.getElementById('opacityValue');
+
+        opacitySlider.addEventListener('input', function (e) {
+            const opacity = e.target.value / 100;
+            Object.values(wmsLayers).forEach(layer => {
+                layer.setOpacity(opacity);
+            });
+            opacityValue.textContent = e.target.value + '%';
+        });
+
+        // Add scale control
+        L.control.scale({
+            position: 'bottomright',
+            metric: true,
+            imperial: false
+        }).addTo(map);
+
+        // Coordinates display
+        map.on('mousemove', function (e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            document.getElementById('coordText').innerHTML =
+                `Lat: ${lat}<br>Lng: ${lng}`;
+        });
+
+        // Hide loading message after map loads
+        setTimeout(function () {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }, 2000);
+
+        // Add click event for debugging and feature info
+        map.on('click', function (e) {
+            console.log('Clicked at:', e.latlng);
+            console.log('Map bounds:', map.getBounds());
+            
+            // You can add GetFeatureInfo request here if needed
+            const point = map.latLngToContainerPoint(e.latlng, map.getZoom());
+            const size = map.getSize();
+            const bounds = map.getBounds();
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
+            
+            console.log('Point for GetFeatureInfo:', point);
+            console.log('Map size:', size);
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            map.invalidateSize();
+        });
+
+        // Add pipeline safety information
+        const pipelineInfo = L.control({
+            position: 'bottomright'
+        });
+
+        pipelineInfo.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'info-panel');
+            div.style.fontSize = '11px';
+            div.style.maxWidth = '250px';
+            div.innerHTML = `
+                <h6 style="margin: 0 0 5px 0; color: #e74c3c;">⚠️ Pipeline Safety</h6>
+                <p style="margin: 0;">For any work near pipelines, mandatory DT-DICT declarations required by French law.</p>
+            `;
+            return div;
+        };
+
+        pipelineInfo.addTo(map);
+    </script>
+</body>
+
+</html>
