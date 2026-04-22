@@ -676,7 +676,8 @@ export const getRTETileUrl = (z: number, x: number, y: number, filters?: any): s
   }
   
   const paramString = params.toString();
-  return `${window.location.origin}/api/geodata/tiles/rte/${z}/${x}/${y}/${paramString ? '?' + paramString : ''}`;
+  const origin = typeof globalThis !== 'undefined' && (globalThis as any).window ? (globalThis as any).window.location.origin : '';
+  return `${origin}/api/geodata/tiles/rte/${z}/${x}/${y}/${paramString ? '?' + paramString : ''}`;
 };
 
 // Generate RTE metadata
