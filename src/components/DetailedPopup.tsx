@@ -50,7 +50,11 @@ const DetailedPopup: React.FC<DetailedPopupProps> = ({ properties, onClose }) =>
       properties.department_code &&
       hasRealInfrastructureData;
 
-    setIsLoading(!isDataReady);
+    const timer = setTimeout(() => {
+      setIsLoading(!isDataReady);
+    }, 200);
+
+    return () => clearTimeout(timer);
   }, [properties]);
 
   // Side panel handlers

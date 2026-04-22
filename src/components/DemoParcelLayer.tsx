@@ -38,7 +38,6 @@ interface DemoParcelLayerProps {
         fillOpacity?: number;
         fillOutlineColor?: string;
     };
-    highlightedParcelId?: string | null;
 }
 
 // Default layer style
@@ -53,8 +52,7 @@ const DemoParcelLayerComponent: React.FC<DemoParcelLayerProps> = memo(({
     sourceId = 'demo-parcel-source',
     visible = true,
     onParcelClick,
-    paintProperties,
-    highlightedParcelId
+    paintProperties
 }) => {
     const initializedRef = useRef(false);
 
@@ -153,22 +151,6 @@ const DemoParcelLayerComponent: React.FC<DemoParcelLayerProps> = memo(({
                 });
             }
 
-            // Add highlight layer
-            const highlightLayerId = `${id}-highlight`;
-            if (!map.getLayer(highlightLayerId)) {
-                map.addLayer({
-                    id: highlightLayerId,
-                    type: 'line',
-                    source: sourceId,
-                    paint: {
-                        'line-color': '#fbbf24',
-                        'line-width': 3,
-                        'line-opacity': 1
-                    },
-                    layout: { visibility: 'none' }
-                });
-            }
-
             initializedRef.current = true;
         }
 
@@ -214,30 +196,7 @@ const DemoParcelLayerComponent: React.FC<DemoParcelLayerProps> = memo(({
         if (outlineLayer) {
             map.setLayoutProperty(`${id}-outline`, 'visibility', visible ? 'visible' : 'none');
         }
-
-        const highlightLayer = map.getLayer(`${id}-highlight`);
-        if (highlightLayer) {
-            map.setLayoutProperty(`${id}-highlight`, 'visibility', visible ? 'visible' : 'none');
-        }
     }, [map, visible, id]);
-
-    // Update highlight filter when highlightedParcelId changes
-    useEffect(() => {
-        if (!map || !map.isStyleLoaded()) return;
-        
-        const highlightLayerId = `${id}-highlight`;
-        if (map.getLayer(highlightLayerId)) {
-            if (highlightedParcelId) {
-                // Show highlight for the selected parcel
-                map.setFilter(highlightLayerId, ['==', ['get', 'parcel_id'], highlightedParcelId]);
-                map.setLayoutProperty(highlightLayerId, 'visibility', 'visible');
-            } else {
-                // Hide highlight when no parcel is selected
-                map.setFilter(highlightLayerId, ['==', ['get', 'parcel_id'], '']);
-                map.setLayoutProperty(highlightLayerId, 'visibility', 'none');
-            }
-        }
-    }, [map, highlightedParcelId, id]);
 
     return null;
 });
