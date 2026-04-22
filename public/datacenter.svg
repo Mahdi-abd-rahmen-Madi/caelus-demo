@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="32" height="32">
+  <defs>
+    <linearGradient id="datacenterGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#357ABD;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="datacenterGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#67B26F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4CA2CD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Server rack background -->
+  <rect x="40" y="30" width="176" height="196" rx="8" fill="url(#datacenterGrad1)" opacity="0.9"/>
+  
+  <!-- Server units -->
+  <g id="servers">
+    <!-- Server 1 -->
+    <rect x="50" y="45" width="156" height="28" rx="4" fill="#2C3E50" opacity="0.8"/>
+    <circle cx="65" cy="59" r="3" fill="#2ECC71"/>
+    <circle cx="75" cy="59" r="3" fill="#F39C12"/>
+    <rect x="90" y="55" width="40" height="8" rx="2" fill="#34495E"/>
+    <rect x="140" y="55" width="60" height="8" rx="2" fill="#34495E"/>
+    
+    <!-- Server 2 -->
+    <rect x="50" y="78" width="156" height="28" rx="4" fill="#2C3E50" opacity="0.8"/>
+    <circle cx="65" cy="92" r="3" fill="#2ECC71"/>
+    <circle cx="75" cy="92" r="3" fill="#2ECC71"/>
+    <rect x="90" y="88" width="40" height="8" rx="2" fill="#34495E"/>
+    <rect x="140" y="88" width="60" height="8" rx="2" fill="#34495E"/>
+    
+    <!-- Server 3 -->
+    <rect x="50" y="111" width="156" height="28" rx="4" fill="#2C3E50" opacity="0.8"/>
+    <circle cx="65" cy="125" r="3" fill="#2ECC71"/>
+    <circle cx="75" cy="125" r="3" fill="#F39C12"/>
+    <rect x="90" y="121" width="40" height="8" rx="2" fill="#34495E"/>
+    <rect x="140" y="121" width="60" height="8" rx="2" fill="#34495E"/>
+    
+    <!-- Server 4 -->
+    <rect x="50" y="144" width="156" height="28" rx="4" fill="#2C3E50" opacity="0.8"/>
+    <circle cx="65" cy="158" r="3" fill="#2ECC71"/>
+    <circle cx="75" cy="158" r="3" fill="#2ECC71"/>
+    <rect x="90" y="154" width="40" height="8" rx="2" fill="#34495E"/>
+    <rect x="140" y="154" width="60" height="8" rx="2" fill="#34495E"/>
+    
+    <!-- Server 5 -->
+    <rect x="50" y="177" width="156" height="28" rx="4" fill="#2C3E50" opacity="0.8"/>
+    <circle cx="65" cy="191" r="3" fill="#2ECC71"/>
+    <circle cx="75" cy="191" r="3" fill="#F39C12"/>
+    <rect x="90" y="187" width="40" height="8" rx="2" fill="#34495E"/>
+    <rect x="140" y="187" width="60" height="8" rx="2" fill="#34495E"/>
+  </g>
+  
+  <!-- Network indicators -->
+  <g id="network" opacity="0.7">
+    <circle cx="220" cy="60" r="4" fill="url(#datacenterGrad2)">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="220" cy="90" r="4" fill="url(#datacenterGrad2)">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="220" cy="120" r="4" fill="url(#datacenterGrad2)">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Ventilation grilles -->
+  <g id="vents" opacity="0.5">
+    <line x1="45" y1="210" x2="45" y2="220" stroke="#1A252F" stroke-width="2"/>
+    <line x1="50" y1="210" x2="50" y2="220" stroke="#1A252F" stroke-width="2"/>
+    <line x1="55" y1="210" x2="55" y2="220" stroke="#1A252F" stroke-width="2"/>
+    <line x1="60" y1="210" x2="60" y2="220" stroke="#1A252F" stroke-width="2"/>
+    
+    <line x1="195" y1="210" x2="195" y2="220" stroke="#1A252F" stroke-width="2"/>
+    <line x1="200" y1="210" x2="200" y2="220" stroke="#1A252F" stroke-width="2"/>
+    <line x1="205" y1="210" x2="205" y2="220" stroke="#1A252F" stroke-width="2"/>
+    <line x1="210" y1="210" x2="210" y2="220" stroke="#1A252F" stroke-width="2"/>
+  </g>
+</svg>
