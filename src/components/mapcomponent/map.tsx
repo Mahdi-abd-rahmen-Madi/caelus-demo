@@ -116,8 +116,8 @@ interface MapProps {
 }
 
 export const MapComponent = ({
-  center = [4.8059, 43.9493], // Center of Avignon
-  zoom = 11, // Zoom level appropriate for viewing 20km area
+  center = [4.7866, 43.9267], // Exact location specified
+  zoom = 14, // Zoom level to show both WMS parcels (14+) and buildings (12+) on initial load
   onLoad,
   radius = 10,
   location = center,
