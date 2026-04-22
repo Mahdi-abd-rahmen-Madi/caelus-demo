@@ -32,6 +32,8 @@ interface DemoParcelLayerProps {
     id?: string;
     sourceId?: string;
     visible?: boolean;
+    minZoom?: number;
+    maxZoom?: number;
     onParcelClick?: (properties: LocalVacantParcelProperties | EnhancedParcelProperties) => void;
     paintProperties?: {
         fillColor?: string;
@@ -51,10 +53,19 @@ const DemoParcelLayerComponent: React.FC<DemoParcelLayerProps> = memo(({
     id = 'demo-parcel-layer',
     sourceId = 'demo-parcel-source',
     visible = true,
+    minZoom = 14,
+    maxZoom = 20,
     onParcelClick,
     paintProperties
 }) => {
     const initializedRef = useRef(false);
+
+    // Check if current zoom is within visibility range
+    const isZoomInRange = useCallback(() => {
+        if (!map) return false;
+        const currentZoom = map.getZoom();
+        return currentZoom >= minZoom && currentZoom <= maxZoom;
+    }, [map, minZoom, maxZoom]);
 
     // Get current style based on paint properties
     const getCurrentStyle = useCallback(() => {
@@ -152,7 +163,40 @@ const DemoParcelLayerComponent: React.FC<DemoParcelLayerProps> = memo(({
             }
 
             initializedRef.current = true;
+            
+            // Enhanced visibility triggers for high zoom levels
+            const currentZoom = map.getZoom();
+            const delay = currentZoom >= 14 ? 200 : 50;
+            
+            setTimeout(() => {
+                updateLayerVisibility();
+            }, delay);
+
+            // Additional check for high zoom levels
+            if (currentZoom >= 14) {
+                setTimeout(() => {
+                    updateLayerVisibility();
+                }, 300);
+            }
         }
+
+        // Update layer visibility function
+        const updateLayerVisibility = () => {
+            if (!map || !initializedRef.current) return;
+            
+            const zoomInRange = isZoomInRange();
+            const shouldShow = visible && zoomInRange;
+            
+            const fillLayer = map.getLayer(`${id}-fill`);
+            if (fillLayer) {
+                map.setLayoutProperty(`${id}-fill`, 'visibility', shouldShow ? 'visible' : 'none');
+            }
+            
+            const outlineLayer = map.getLayer(`${id}-outline`);
+            if (outlineLayer) {
+                map.setLayoutProperty(`${id}-outline`, 'visibility', shouldShow ? 'visible' : 'none');
+            }
+        };
 
         // Handle style changes
         const handleStyleChange = () => {
@@ -181,22 +225,85 @@ const DemoParcelLayerComponent: React.FC<DemoParcelLayerProps> = memo(({
         return () => {
             window.removeEventListener('mapStyleChanged', handleStyleChange);
         };
-    }, [map, visible, sourceId, id, getCurrentStyle, onParcelClick, parcelData]);
+    }, [map, visible, sourceId, id, getCurrentStyle, onParcelClick, parcelData, isZoomInRange]);
 
     // Handle visibility changes
     useEffect(() => {
         if (!map || !map.isStyleLoaded()) return;
         
+        const zoomInRange = isZoomInRange();
+        const shouldShow = visible && zoomInRange;
+        
         const fillLayer = map.getLayer(`${id}-fill`);
         if (fillLayer) {
-            map.setLayoutProperty(`${id}-fill`, 'visibility', visible ? 'visible' : 'none');
+            map.setLayoutProperty(`${id}-fill`, 'visibility', shouldShow ? 'visible' : 'none');
         }
         
         const outlineLayer = map.getLayer(`${id}-outline`);
         if (outlineLayer) {
-            map.setLayoutProperty(`${id}-outline`, 'visibility', visible ? 'visible' : 'none');
+            map.setLayoutProperty(`${id}-outline`, 'visibility', shouldShow ? 'visible' : 'none');
         }
-    }, [map, visible, id]);
+    }, [map, visible, id, isZoomInRange]);
+
+    // Add map event listeners for immediate visibility
+    useEffect(() => {
+        if (!map || !visible) return;
+
+        const updateLayerVisibility = () => {
+            if (!map || !initializedRef.current) return;
+            
+            const zoomInRange = isZoomInRange();
+            const shouldShow = visible && zoomInRange;
+            
+            const fillLayer = map.getLayer(`${id}-fill`);
+            if (fillLayer) {
+                map.setLayoutProperty(`${id}-fill`, 'visibility', shouldShow ? 'visible' : 'none');
+            }
+            
+            const outlineLayer = map.getLayer(`${id}-outline`);
+            if (outlineLayer) {
+                map.setLayoutProperty(`${id}-outline`, 'visibility', shouldShow ? 'visible' : 'none');
+            }
+        };
+
+        const handleMapLoad = () => {
+            setTimeout(() => {
+                updateLayerVisibility();
+            }, 50);
+        };
+
+        const handleMapMove = () => {
+            if (map.getZoom() >= 14) {
+                setTimeout(() => {
+                    updateLayerVisibility();
+                }, 100);
+            }
+        };
+
+        const handleMapZoom = () => {
+            setTimeout(() => {
+                updateLayerVisibility();
+            }, 150);
+        };
+
+        map.on('load', handleMapLoad);
+        map.on('moveend', handleMapMove);
+        map.on('zoomend', handleMapZoom);
+
+        if (map.loaded()) {
+            setTimeout(() => {
+                updateLayerVisibility();
+            }, 50);
+        }
+
+        return () => {
+            if (map) {
+                map.off('load', handleMapLoad);
+                map.off('moveend', handleMapMove);
+                map.off('zoomend', handleMapZoom);
+            }
+        };
+    }, [map, visible, id, isZoomInRange]);
 
     return null;
 });

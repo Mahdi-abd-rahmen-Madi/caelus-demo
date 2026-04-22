@@ -18,9 +18,9 @@ export const BASE_STYLE = {
   sources: {
     'basemap-tiles': {
       type: 'raster',
-      tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
       tileSize: 256,
-      attribution: '© OpenStreetMap contributors'
+      attribution: '© Esri © OpenStreetMap contributors'
     },
     // Add geojson source placeholder to allow adding geojson layers later
     'geojson-placeholder': {

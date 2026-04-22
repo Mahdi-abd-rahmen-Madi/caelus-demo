@@ -141,10 +141,27 @@ const IGNVectorTileLayer: React.FC<IGNVectorTileProps> = ({
       initializedRef.current = true;
       onLoadingChange?.(false);
 
-      // Trigger immediate visibility update after initialization
+      // Trigger visibility update after initialization and tile loading
+      // Use a longer delay for high zoom levels to ensure tiles load properly
+      const currentZoom = map.getZoom();
+      const delay = currentZoom >= 17 ? 200 : 50; // Longer delay for zoom 17+
+      
       setTimeout(() => {
         updateLayerVisibility();
-      }, 50);
+      }, delay);
+
+      // Additional check for tile loading completion at high zoom
+      if (currentZoom >= 17) {
+        const checkTileLoading = () => {
+          const source = map.getSource(config.sourceId) as any;
+          if (source && map.isSourceLoaded(config.sourceId)) {
+            updateLayerVisibility();
+          } else {
+            setTimeout(checkTileLoading, 100);
+          }
+        };
+        setTimeout(checkTileLoading, 300);
+      }
     } catch (error) {
       handleLoadError(config.sourceId, `Failed to initialize: ${error}`);
     }
@@ -229,14 +246,25 @@ const IGNVectorTileLayer: React.FC<IGNVectorTileProps> = ({
     // Handle style changes
     window.addEventListener('mapStyleChanged', handleStyleChange);
 
+    const initializeAndShow = () => {
+      tryInitialize();
+      
+      // Force visibility update after map is fully loaded
+      setTimeout(() => {
+        if (map && map.isStyleLoaded()) {
+          updateLayerVisibility();
+        }
+      }, 100);
+    };
+
     if (!map.isStyleLoaded()) {
       const onStyleData = () => {
-        tryInitialize();
+        initializeAndShow();
         map.off('styledata', onStyleData);
       };
       map.on('styledata', onStyleData);
     } else {
-      tryInitialize();
+      initializeAndShow();
     }
 
     return () => {
@@ -253,6 +281,54 @@ const IGNVectorTileLayer: React.FC<IGNVectorTileProps> = ({
   useEffect(() => {
     updateLayerOpacity();
   }, [updateLayerOpacity]);
+
+  // Add map event listeners to ensure immediate visibility
+  useEffect(() => {
+    if (!map || !visible) return;
+
+    const handleMapLoad = () => {
+      // Force immediate visibility when map is fully loaded
+      setTimeout(() => {
+        updateLayerVisibility();
+      }, 50);
+    };
+
+    const handleMapMove = () => {
+      // At high zoom levels, ensure layers are visible after map movement
+      if (map.getZoom() >= 17) {
+        setTimeout(() => {
+          updateLayerVisibility();
+        }, 100);
+      }
+    };
+
+    const handleMapZoom = () => {
+      // Ensure visibility updates after zoom changes
+      setTimeout(() => {
+        updateLayerVisibility();
+      }, 150);
+    };
+
+    // Listen for map load event
+    map.on('load', handleMapLoad);
+    map.on('moveend', handleMapMove);
+    map.on('zoomend', handleMapZoom);
+
+    // If map is already loaded, trigger visibility immediately
+    if (map.loaded()) {
+      setTimeout(() => {
+        updateLayerVisibility();
+      }, 50);
+    }
+
+    return () => {
+      if (map) {
+        map.off('load', handleMapLoad);
+        map.off('moveend', handleMapMove);
+        map.off('zoomend', handleMapZoom);
+      }
+    };
+  }, [map, visible, updateLayerVisibility]);
 
   // Cleanup on unmount
   useEffect(() => {

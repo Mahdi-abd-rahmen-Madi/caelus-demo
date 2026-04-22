@@ -25,6 +25,11 @@ interface TrackerData {
   loading: boolean;
   error: string | null;
   lastUpdated: number;
+  // Individual loading states for progressive rendering
+  inondationLoading: boolean;
+  heatwaveLoading: boolean;
+  seismicLoading: boolean;
+  thunderLoading: boolean;
 }
 
 // Debounce utility for map movements
@@ -49,7 +54,11 @@ const OptimizedTrackersWrapper: React.FC<OptimizedTrackersWrapperProps> = memo((
     thunder: null,
     loading: false,
     error: null,
-    lastUpdated: 0
+    lastUpdated: 0,
+    inondationLoading: false,
+    heatwaveLoading: false,
+    seismicLoading: false,
+    thunderLoading: false
   });
 
   // Hide component when DVF popup is open and transaction list is shown
@@ -69,55 +78,124 @@ const OptimizedTrackersWrapper: React.FC<OptimizedTrackersWrapperProps> = memo((
     return Math.abs(lng - lastLng) > threshold || Math.abs(lat - lastLat) > threshold;
   }, []);
 
-  // Update tracker data with error handling
-  const updateTrackerData = useCallback(async (lng: number, lat: number) => {
+  // Update tracker data with non-blocking async approach and progressive loading
+  const updateTrackerData = useCallback((lng: number, lat: number) => {
     if (!hasCoordinatesChanged(lng, lat)) return;
 
     lastCoordinatesRef.current = { lng, lat };
     
-    // Start performance tracking
-    layerPerformanceMonitor.startLayerLoad('RiskTrackers', 'low');
-    
-    setTrackerData(prev => ({ ...prev, loading: true, error: null }));
+    // Set loading state immediately without blocking
+    setTrackerData(prev => ({ 
+      ...prev, 
+      loading: true, 
+      error: null,
+      inondationLoading: true,
+      heatwaveLoading: true,
+      seismicLoading: true,
+      thunderLoading: true
+    }));
 
-    try {
-      const data = await mapDataCoordinator.fetchAllTrackerData(lng, lat);
-      
-      setTrackerData({
-        ...data,
-        loading: false,
-        error: null,
-        lastUpdated: Date.now()
+    // Schedule data fetching during idle time or with delay
+    const scheduleDataFetch = () => {
+      // Use requestIdleCallback if available, otherwise fallback to setTimeout
+      const scheduleCallback = (callback: () => void) => {
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(callback, { timeout: 2000 });
+        } else {
+          setTimeout(callback, 100);
+        }
+      };
+
+      scheduleCallback(async () => {
+        try {
+          // Start performance tracking
+          layerPerformanceMonitor.startLayerLoad('RiskTrackers', 'low');
+          
+          // Fetch individual tracker data progressively
+          const fetchIndividualTracker = async (trackerType: keyof Pick<TrackerData, 'inondation' | 'heatwave' | 'seismic' | 'thunder'>) => {
+            try {
+              let data: any;
+              switch (trackerType) {
+                case 'inondation':
+                  data = await mapDataCoordinator.fetchInondationData(lng, lat);
+                  break;
+                case 'heatwave':
+                  data = await mapDataCoordinator.fetchHeatwaveData(lng, lat);
+                  break;
+                case 'seismic':
+                  data = await mapDataCoordinator.fetchSeismicData(lng, lat);
+                  break;
+                case 'thunder':
+                  data = await mapDataCoordinator.fetchThunderData(lng, lat);
+                  break;
+              }
+              
+              // Update individual tracker state as data arrives
+              setTrackerData(prev => ({
+                ...prev,
+                [trackerType]: data,
+                [`${trackerType}Loading`]: false
+              }));
+            } catch (error) {
+              console.error(`Failed to fetch ${trackerType} data:`, error);
+              setTrackerData(prev => ({
+                ...prev,
+                [`${trackerType}Loading`]: false
+              }));
+            }
+          };
+
+          // Fetch all trackers in parallel but update state individually
+          await Promise.allSettled([
+            fetchIndividualTracker('inondation'),
+            fetchIndividualTracker('heatwave'),
+            fetchIndividualTracker('seismic'),
+            fetchIndividualTracker('thunder')
+          ]);
+          
+          // Mark overall loading as complete
+          setTrackerData(prev => ({
+            ...prev,
+            loading: false,
+            lastUpdated: Date.now()
+          }));
+          
+          // End performance tracking
+          layerPerformanceMonitor.endLayerLoad('RiskTrackers');
+          
+          // Log performance summary asynchronously
+          setTimeout(() => {
+            layerPerformanceMonitor.logSummary();
+          }, 1000);
+          
+        } catch (error) {
+          console.error('Failed to fetch tracker data:', error);
+          layerPerformanceMonitor.endLayerLoad('RiskTrackers');
+          setTrackerData(prev => ({
+            ...prev,
+            loading: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            inondationLoading: false,
+            heatwaveLoading: false,
+            seismicLoading: false,
+            thunderLoading: false
+          }));
+        }
       });
-      
-      // End performance tracking
-      layerPerformanceMonitor.endLayerLoad('RiskTrackers');
-      
-      // Log performance summary
-      setTimeout(() => {
-        layerPerformanceMonitor.logSummary();
-      }, 1000);
-      
-    } catch (error) {
-      console.error('Failed to fetch tracker data:', error);
-      layerPerformanceMonitor.endLayerLoad('RiskTrackers');
-      setTrackerData(prev => ({
-        ...prev,
-        loading: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }));
-    }
+    };
+
+    scheduleDataFetch();
   }, [hasCoordinatesChanged]);
 
   // Debounced update function
   const debouncedUpdate = useCallback(
     debounce((lng: number, lat: number) => {
       updateTrackerData(lng, lat);
-    }, 2000), // 2000ms debounce
+    }, 2000), // Increased to 2000ms debounce for better async behavior
     [updateTrackerData]
   );
 
-  // Initialize and handle map movements
+  // Initialize and handle map movements with delay to prevent blocking other layers
   useEffect(() => {
     if (!map || !visible) return;
 
@@ -133,27 +211,23 @@ const OptimizedTrackersWrapper: React.FC<OptimizedTrackersWrapperProps> = memo((
         clearTimeout(updateTimeoutRef.current);
       }
 
-      // Use requestIdleCallback for non-blocking updates
+      // Use simple timeout instead of requestIdleCallback to prevent blocking
       const scheduleUpdate = () => {
-        if (window.requestIdleCallback) {
-          window.requestIdleCallback(() => {
-            debouncedUpdate(lng, lat);
-          }, { timeout: 1000 });
-        } else {
-          // Fallback for browsers without requestIdleCallback
-          updateTimeoutRef.current = window.setTimeout(() => {
-            debouncedUpdate(lng, lat);
-          }, 100);
-        }
+        updateTimeoutRef.current = window.setTimeout(() => {
+          debouncedUpdate(lng, lat);
+        }, 100);
       };
 
       scheduleUpdate();
     };
 
-    // Initial load
+    // Delayed initial load to let parcels and buildings load first
     if (!isInitialized) {
       setIsInitialized(true);
-      handleMapMove();
+      // Add 1500ms delay before initial tracker load to allow critical layers to render
+      setTimeout(() => {
+        handleMapMove();
+      }, 1500);
     }
 
     // Listen to map movements
@@ -239,16 +313,17 @@ const OptimizedTrackersWrapper: React.FC<OptimizedTrackersWrapperProps> = memo((
     }
   };
 
-  // Render individual tracker with data injection
+  // Render individual tracker with data injection and individual loading states
   const renderTracker = (TrackerComponent: React.ComponentType<any>, data: any, trackerType: string) => {
-    console.log(`OptimizedTrackersWrapper: Rendering ${trackerType} with data:`, data);
+    const isLoading = trackerData[`${trackerType}Loading` as keyof TrackerData] as boolean;
+    console.log(`OptimizedTrackersWrapper: Rendering ${trackerType} with data:`, data, 'loading:', isLoading);
     return (
       <Box sx={getTrackerStyles(trackerType as any)}>
         <Suspense fallback={<div />}>
           <TrackerComponent 
             map={map} 
             injectedData={data}
-            isLoading={trackerData.loading}
+            isLoading={isLoading}
           />
         </Suspense>
       </Box>

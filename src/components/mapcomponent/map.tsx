@@ -116,8 +116,8 @@ interface MapProps {
 }
 
 export const MapComponent = ({
-  center = [4.7866, 43.9267], // Exact location specified
-  zoom = 14, // Zoom level to show both WMS parcels (14+) and buildings (12+) on initial load
+  center = [4.7887, 43.9291], // Exact location specified
+  zoom = 20, // Higher zoom level for better initial visibility of parcels and buildings
   onLoad,
   radius = 10,
   location = center,
@@ -801,6 +801,8 @@ export const MapComponent = ({
 
           // Preload initial tiles for default basemap
           preloadBasemapTiles(mapState.internalSelectedBaseMap, { lng: mapState.center[0], lat: mapState.center[1] }, mapState.zoom).catch(() => { });
+
+          // Let layers initialize naturally without artificial event firing
         });
       }
     };
@@ -873,23 +875,65 @@ export const MapComponent = ({
         </div>
       </Suspense>
 
-      {/* Critical Priority - Parcel Layer */}
+      {/* PRIORITY TARGET LAYERS - Separate Suspense boundaries for optimal loading */}
+      
+      {/* BDTOPO Buildings Layer - Highest Priority (minZoom 12) */}
+      <Suspense fallback={
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
+      }>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+          <BDTOPO
+            map={map.current}
+            visible={mapState.showBDTOPONetwork}
+            bdtopoLayers={mapState.bdtopoLayers}
+            opacity={0.7}
+            minZoom={12}
+            maxZoom={20}
+            onLoadError={() => {
+            }}
+            onFeatureClick={() => {
+            }}
+          />
+        </div>
+      </Suspense>
+
+      {/* PCIParcels Cadastral Layer - High Priority (minZoom 14) */}
+      <Suspense fallback={
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
+      }>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+          <PCIParcels
+            map={map.current}
+            visible={mapState.showPCINetwork}
+            pciLayers={mapState.pciLayers}
+            opacity={0.7}
+            minZoom={14}
+            maxZoom={20}
+            onLoadError={() => {
+            }}
+            onFeatureClick={() => {
+            }}
+          />
+        </div>
+      </Suspense>
+
+      {/* DemoParcelLayer - High Priority (minZoom 14) */}
       <Suspense fallback={
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
       }>
         {mapState.showDynamicMVTSimple && (
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-            <DemoParcelLayer
-              map={map.current}
-              visible={true}
-              onParcelClick={handleParcelClick}
-              paintProperties={paintProperties()}
-            />
-          </div>
+          <DemoParcelLayer
+            map={map.current}
+            visible={true}
+            minZoom={14}
+            onParcelClick={handleParcelClick}
+            paintProperties={paintProperties()}
+          />
         )}
       </Suspense>
 
-      {/* High Priority WMS Layers - Load with 100ms delay */}
+      
+      {/* High Priority WMS Layers - Load after target layers */}
       <Suspense fallback={<div />}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
           <SeismicV1
@@ -1010,50 +1054,7 @@ export const MapComponent = ({
         </div>
       </Suspense>
 
-      {/* IGN Vector Layers */}
-      <Suspense fallback={<div />}>
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-          <PCIParcels
-            map={map.current}
-            visible={mapState.showPCINetwork}
-            pciLayers={mapState.pciLayers}
-            opacity={0.7}
-            minZoom={14}
-            maxZoom={20}
-            onLoadError={() => {
-            }}
-            onFeatureClick={() => {
-            }}
-          />
-          <BDTOPO
-            map={map.current}
-            visible={mapState.showBDTOPONetwork}
-            bdtopoLayers={mapState.bdtopoLayers}
-            opacity={0.7}
-            minZoom={12}
-            maxZoom={20}
-            onLoadError={() => {
-            }}
-            onFeatureClick={() => {
-            }}
-          />
-        </div>
-      </Suspense>
-
-      {/* Parcel Layer - using Dynamic MVT vector tiles by default */}
-      <Suspense fallback={
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
-      }>
-        {mapState.showDynamicMVTSimple && (
-          <DemoParcelLayer
-            map={map.current}
-            visible={true}
-            onParcelClick={handleParcelClick}
-            paintProperties={paintProperties()}
-          />
-        )}
-      </Suspense>
-
+      
       {/* Enedis V2 Layer */}
       <Suspense fallback={<div />}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
@@ -1167,15 +1168,7 @@ export const MapComponent = ({
         </div>
       </Suspense>
 
-      {/* Risk Trackers Wrapper - Handles positioning based on popup state */}
-      <Suspense fallback={<div />}>
-        <RiskTrackersWrapper
-          map={map.current}
-          isPopupVisible={!!selectedParcel}
-          visible={mapState.showRiskTrackers}
-        />
-      </Suspense>
-
+      
       {/* Detailed Popup */}
       {
         selectedParcel && (
@@ -1402,6 +1395,15 @@ export const MapComponent = ({
         latitude={selectedParcel?.latitude}
         visible={!!selectedParcel}
       />
+
+      {/* Risk Trackers Wrapper - Moved to end with delay to prevent blocking parcels/buildings */}
+      <Suspense fallback={<div />}>
+        <RiskTrackersWrapper
+          map={map.current}
+          isPopupVisible={!!selectedParcel}
+          visible={mapState.showRiskTrackers}
+        />
+      </Suspense>
 
     </>
   );
