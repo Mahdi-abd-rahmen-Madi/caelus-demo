@@ -236,7 +236,7 @@ export const MapComponent = ({
   }, [showRulerTool, showBufferZone, bufferRadius, bufferCenter]);
 
   // Use parcel selection state from new context
-  const { selectedParcel, highlightedParcelId } = useParcelSelectionState();
+  const { selectedParcel } = useParcelSelectionState();
   const { selectParcel, clearParcelSelection } = useAppState();
   const [legendHiddenByPopups, setLegendHiddenByPopups] = useState(false);
   const [selectedNuclearReactor, setSelectedNuclearReactor] = useState<any>(null);
@@ -884,7 +884,6 @@ export const MapComponent = ({
               visible={true}
               onParcelClick={handleParcelClick}
               paintProperties={paintProperties()}
-              highlightedParcelId={highlightedParcelId}
             />
           </div>
         )}
@@ -1201,6 +1200,7 @@ export const MapComponent = ({
       {/* DVF Popup */}
       <DVFPopup
         parcelId={selectedParcel?.parcel_id}
+        onResetParcel={clearParcelSelection}
       />
 
       {/* Nuclear Popup */}

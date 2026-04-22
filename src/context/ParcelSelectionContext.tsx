@@ -27,14 +27,8 @@ export const ParcelSelectionProvider: React.FC<ParcelSelectionProviderProps> = (
   const [highlightedParcelId, setHighlightedParcelId] = useState<string | null>(null);
 
   const selectParcel = useCallback((parcel: ParcelSelectionProperties, _shouldFlyTo = true) => {
-    // Clear selection briefly to ensure skeleton shows when switching parcels
-    setSelectedParcel(null);
     setHighlightedParcelId(parcel.parcel_id);
-
-    // Set the new parcel in the next tick to allow skeleton to show
-    setTimeout(() => {
-      setSelectedParcel(parcel);
-    }, 0);
+    setSelectedParcel(parcel);
   }, []);
 
   const clearSelection = useCallback(() => {
@@ -47,14 +41,8 @@ export const ParcelSelectionProvider: React.FC<ParcelSelectionProviderProps> = (
   }, [highlightedParcelId]);
 
   const selectParcelWithoutFlying = useCallback((parcel: ParcelSelectionProperties) => {
-    // Clear selection briefly to ensure skeleton shows when switching parcels
-    setSelectedParcel(null);
     setHighlightedParcelId(parcel.parcel_id);
-
-    // Set the new parcel in the next tick to allow skeleton to show
-    setTimeout(() => {
-      setSelectedParcel(parcel);
-    }, 0);
+    setSelectedParcel(parcel);
   }, []);
 
   const value: ParcelSelectionContextType = {

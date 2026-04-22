@@ -13,19 +13,17 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../context/AppStateContext';
 import DVFTransactionList from './DVFTransactionList';
 
 interface DVFPopupProps {
     parcelId?: string;
-    onResetParcel?: () => void;
 }
 
 const DVFPopup: React.FC<DVFPopupProps> = ({ 
-    parcelId, 
-    onResetParcel 
+    parcelId
 }) => {
     const { t } = useTranslation();
     const { setDvfPopupOpen, setDvfTransactionListShown } = useAppState();
@@ -33,7 +31,6 @@ const DVFPopup: React.FC<DVFPopupProps> = ({
     const [transactionCount, setTransactionCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
-    const resetTimerRef = useRef<number | null>(null);
 
     const handleTransactionCountChange = useCallback((count: number) => {
         setTransactionCount(count);
@@ -47,28 +44,6 @@ const DVFPopup: React.FC<DVFPopupProps> = ({
     const handleRefresh = useCallback(() => {
         setIsLoading(true);
         setRefreshKey(prev => prev + 1);
-    }, []);
-
-    // Auto-reset timer logic
-    const startResetTimer = useCallback(() => {
-        if (resetTimerRef.current !== null) {
-            clearTimeout(resetTimerRef.current);
-        }
-        
-        const timer = window.setTimeout(() => {
-            if (onResetParcel) {
-                onResetParcel();
-            }
-        }, 5000); // 5 seconds
-        
-        resetTimerRef.current = timer;
-    }, [onResetParcel]);
-
-    const clearResetTimer = useCallback(() => {
-        if (resetTimerRef.current !== null) {
-            clearTimeout(resetTimerRef.current);
-            resetTimerRef.current = null;
-        }
     }, []);
 
     // Update AppState when popup is open/closed
@@ -86,17 +61,6 @@ const DVFPopup: React.FC<DVFPopupProps> = ({
         const isListShown = !isMinimized && !!parcelId;
         setDvfTransactionListShown(isListShown);
     }, [isMinimized, parcelId, setDvfTransactionListShown]);
-
-    // Start timer when parcel is selected
-    useEffect(() => {
-        if (parcelId) {
-            startResetTimer();
-        } else {
-            clearResetTimer();
-        }
-        
-        return clearResetTimer;
-    }, [parcelId, startResetTimer, clearResetTimer]);
 
     // Always visible now, just show placeholder when no parcel selected
     if (!parcelId) {
